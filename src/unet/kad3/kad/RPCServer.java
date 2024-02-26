@@ -20,51 +20,6 @@ public class RPCServer {
 
         try{
             server = new DatagramSocket(port);
-
-            new Thread(new Runnable(){
-                @Override
-                public void run(){
-                    while(!server.isClosed()){
-                        try{
-                            DatagramPacket packet = new DatagramPacket(new byte[65535], 65535);
-                            server.receive(packet);
-
-                            if(packet != null){
-                                packetPool.offer(packet);
-                            }
-                        }catch(IOException e){
-                            e.printStackTrace();
-                        }
-                    }
-                }
-            }).start();
-
-
-            new Thread(new Runnable(){
-                @Override
-                public void run(){
-                    while(!server.isClosed()){
-                        if(!packetPool.isEmpty()){
-                            DatagramPacket packet = packetPool.poll();
-
-
-
-                            //MessageBase b = new MessageBase(packet.getData());
-
-                            //DECODE PACKET TO BENCODE - SEND OFF TO LISTENER
-
-                            /*
-                            try{
-
-                            }catch(IOException e){
-                                e.printStackTrace();
-                            }
-                            */
-                        }
-                    }
-                }
-            }).start();
-
         }catch(IOException e){
             e.printStackTrace();
         }
@@ -91,7 +46,49 @@ public class RPCServer {
     }
 
     public void start(){
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                while(!server.isClosed()){
+                    try{
+                        DatagramPacket packet = new DatagramPacket(new byte[65535], 65535);
+                        server.receive(packet);
 
+                        if(packet != null){
+                            packetPool.offer(packet);
+                        }
+                    }catch(IOException e){
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }).start();
+
+
+        new Thread(new Runnable(){
+            @Override
+            public void run(){
+                while(!server.isClosed()){
+                    if(!packetPool.isEmpty()){
+                        DatagramPacket packet = packetPool.poll();
+
+
+
+                        //MessageBase b = new MessageBase(packet.getData());
+
+                        //DECODE PACKET TO BENCODE - SEND OFF TO LISTENER
+
+                            /*
+                            try{
+
+                            }catch(IOException e){
+                                e.printStackTrace();
+                            }
+                            */
+                    }
+                }
+            }
+        }).start();
     }
 
     public void stop(){
