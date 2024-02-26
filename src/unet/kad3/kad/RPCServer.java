@@ -4,6 +4,7 @@ import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.routing.inter.RoutingTable;
+import unet.kad3.utils.ByteWrapper;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -20,7 +21,7 @@ public class RPCServer {
     public static final int MAX_ACTIVE_CALLS = 20;
     private DatagramSocket server;
     private ConcurrentLinkedQueue<DatagramPacket> packetPool = new ConcurrentLinkedQueue<>();
-    private Map<byte[], RPCCall> calls; //BYTE WILL NEED TO BE WRAPPED AS IT WONT WORK WITH MAPS FOR KEYS...
+    private Map<ByteWrapper, RPCCall> calls; //BYTE WILL NEED TO BE WRAPPED AS IT WONT WORK WITH MAPS FOR KEYS...
     private RoutingTable routingTable;
 
     public RPCServer(RoutingTable routingTable, int port){
@@ -53,7 +54,7 @@ public class RPCServer {
 
 
 
-        RPCCall c = calls.get(m.getTransactionID());
+        RPCCall c = calls.get(new ByteWrapper(m.getTransactionID()));
 
         if(c != null){
 
