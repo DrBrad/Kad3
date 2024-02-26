@@ -58,7 +58,7 @@ public class RPCServer {
         RPCCall c = calls.get(new ByteWrapper(m.getTransactionID()));
 
         if(c != null){
-            if(c.getRequest().getDestinationIP().getAddress().equals(m.getOriginIP().getAddress())){
+            if(c.getRequest().getDestinationIP().equals(m.getOriginIP())){
                 if(calls.remove(new ByteWrapper(m.getTransactionID()), c)){
                     //m.setAssociatedCall(c);
                     c.response(m);
