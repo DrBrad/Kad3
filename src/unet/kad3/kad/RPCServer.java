@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -20,13 +21,15 @@ public class RPCServer {
 
     public static final int MAX_ACTIVE_CALLS = 20;
     private DatagramSocket server;
+    private long startTime;
     private ConcurrentLinkedQueue<DatagramPacket> packetPool = new ConcurrentLinkedQueue<>();
-    private Map<ByteWrapper, RPCCall> calls; //BYTE WILL NEED TO BE WRAPPED AS IT WONT WORK WITH MAPS FOR KEYS...
+    private Map<ByteWrapper, RPCCall> calls;
     private RoutingTable routingTable;
 
     public RPCServer(RoutingTable routingTable, int port){
         this.routingTable = routingTable;
         calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
+        startTime = System.currentTimeMillis();
 
         try{
             server = new DatagramSocket(port);
@@ -61,67 +64,30 @@ public class RPCServer {
                     c.response(m);
                     handleMessage(m);
                 }
-            }
-
-            return;
-        }
-        /*
-        // check if this is a response to an outstanding request
-        RPCCall c = calls.get(new ByteWrapper(msg.getMTID()));
-
-        // message matches transaction ID and origin == destination
-        if(c != null) {
-            // we only check the IP address here. the routing table applies more strict checks to also verify a stable port
-            if(c.getRequest().getDestination().getAddress().equals(msg.getOrigin().getAddress())) {
-                // remove call first in case of exception
-                if(calls.remove(new ByteWrapper(msg.getMTID()),c)) {
-                    msg.setAssociatedCall(c);
-                    c.response(msg);
-
-                    drainTrigger.run();
-                    // apply after checking for a proper response
-                    handleMessage(msg);
-                }
 
                 return;
             }
 
-            // 1. the message is not a request
-            // 2. transaction ID matched
-            // 3. request destination did not match response source!!
-            // 4. we're using random 48 bit MTIDs
-            // this happening by chance is exceedingly unlikely
-
-            // indicates either port-mangling NAT, a multhomed host listening on any-local address or some kind of attack
-            // -> ignore response
-
-            DHT.logError("mtid matched, socket address did not, ignoring message, request: " + c.getRequest().getDestination() + " -> response: " + msg.getOrigin() + " v:"+ msg.getVersion().map(Utils::prettyPrint).orElse(""));
-            if(msg.getType() != MessageBase.Type.ERR_MSG && dh_table.getType() == DHTtype.IPV6_DHT) {
-                // this is more likely due to incorrect binding implementation in ipv6. notify peers about that
-                // don't bother with ipv4, there are too many complications
+            /*
+            if(m.getType() != MessageBase.Type.ERR_MSG && dh_table.getType() == DHTtype.IPV6_DHT){
                 MessageBase err = new ErrorMessage(msg.getMTID(), ErrorCode.GenericError.code, "A request was sent to " + c.getRequest().getDestination() + " and a response with matching transaction id was received from " + msg.getOrigin() + " . Multihomed nodes should ensure that sockets are properly bound and responses are sent with the correct source socket address. See BEPs 32 and 45.");
                 err.setDestination(c.getRequest().getDestination());
                 sendMessage(err);
             }
+            */
 
-            // but expect an upcoming timeout if it's really just a misbehaving node
             c.setSocketMismatch();
-            c.injectStall();
+            //c.injectStall();
 
             return;
         }
 
-        // a) it's a response b) didn't find a call c) uptime is high enough that it's not a stray from a restart
-        // -> did not expect this response
-        if (msg.getType() == Type.RSP_MSG && Duration.between(startTime, Instant.now()).getSeconds() > 2*60) {
-            byte[] mtid = msg.getMTID();
-            DHT.logDebug("Cannot find RPC call for response: "+ Utils.prettyPrint(mtid));
-            ErrorMessage err = new ErrorMessage(mtid, ErrorCode.ServerError.code, "received a response message whose transaction ID did not match a pending request or transaction expired");
-            err.setDestination(msg.getOrigin());
-            sendMessage(err);
+        if(m.getType() == MessageBase.Type.RSP_MSG && System.currentTimeMillis()-startTime > 2*60*1000){ // 2 MINUTES
+            //ErrorMessage err = new ErrorMessage(mtid, ErrorCode.ServerError.code, "received a response message whose transaction ID did not match a pending request or transaction expired");
+            //err.setDestination(msg.getOrigin());
+            //sendMessage(err);
             return;
         }
-        */
 
         if(m.getType() == MessageBase.Type.ERR_MSG){
             handleMessage(m);
