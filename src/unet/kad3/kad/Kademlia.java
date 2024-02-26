@@ -21,9 +21,10 @@ public class Kademlia {
     }
 
     public Kademlia(BucketTypes bucketType, int port){
-        System.out.println("Starting with bucket method: "+bucketType.value());
+        System.out.println("Starting with bucket type: "+bucketType.value());
         try{
             server = new RPCServer((RoutingTable) bucketType.getRoutingTable().newInstance(), port);
+            server.start();
         }catch(IllegalAccessException | InstantiationException e){
             e.printStackTrace();
         }

@@ -3,24 +3,31 @@ package unet.kad3.kad;
 import unet.kad3.messages.MessageBase;
 import unet.kad3.messages.MessageDecoder;
 import unet.kad3.messages.PingRequest;
+import unet.kad3.routing.KB.KBucket;
 import unet.kad3.routing.inter.RoutingTable;
+import unet.kad3.utils.Node;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
 import static unet.kad3.messages.MessageBase.TID_LENGTH;
 
 public class RPCServer {
 
+    public static final int MAX_ACTIVE_CALLS = 20;
     private DatagramSocket server;
     private ConcurrentLinkedQueue<DatagramPacket> packetPool = new ConcurrentLinkedQueue<>();
+    private Map<byte[], RPCCall> calls; //BYTE WILL NEED TO BE WRAPPED AS IT WONT WORK WITH MAPS FOR KEYS...
     private RoutingTable routingTable;
 
     public RPCServer(RoutingTable routingTable, int port){
         this.routingTable = routingTable;
+        calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
 
         try{
             server = new DatagramSocket(port);
@@ -38,7 +45,7 @@ public class RPCServer {
         //m.setOrigin(packet.getAddress(), packet.getPort());
 
         if(m.getType() == MessageBase.Type.RSP_MSG && m.getTransactionID().length != TID_LENGTH){
-            byte[] mtid = m.getTransactionID();
+            byte[] tid = m.getTransactionID();
             //DHT.logDebug("response with invalid mtid length received: "+ Utils.prettyPrint(mtid));
             //ErrorMessage err = new ErrorMessage(mtid, ErrorCode.ServerError.code, "received a response with a transaction id length of "+mtid.length+" bytes, expected [implementation-specific]: "+MTID_LENGTH+" bytes");
             //err.setDestination(msg.getOrigin());
@@ -48,6 +55,7 @@ public class RPCServer {
 
 
 
+        RPCCall c = calls.get(m.getTransactionID());
         /*
         // check if this is a response to an outstanding request
         RPCCall c = calls.get(new ByteWrapper(msg.getMTID()));
