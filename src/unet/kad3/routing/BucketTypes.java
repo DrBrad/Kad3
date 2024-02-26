@@ -25,6 +25,15 @@ public enum BucketTypes {
         }
     };
 
+    public static BucketTypes fromString(String name){
+        for(BucketTypes value : values()){
+            if(value.name().equalsIgnoreCase(name)){
+                return value;
+            }
+        }
+        throw new IllegalArgumentException("No enum constant "+BucketTypes.class.getName()+"."+name);
+    }
+
     public String value(){
         return null;
     }

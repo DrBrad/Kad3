@@ -36,7 +36,7 @@ public class Main {
             Kademlia k = new Kademlia("Kademlia", 8080);
 
         }catch(Exception e){
-
+            e.printStackTrace();
         }
     }
 }

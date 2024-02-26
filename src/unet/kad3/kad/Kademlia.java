@@ -17,7 +17,7 @@ public class Kademlia {
     }
 
     public Kademlia(String bucketType, int port){
-        this(BucketTypes.valueOf(bucketType), port);
+        this(BucketTypes.fromString(bucketType), port);
     }
 
     public Kademlia(BucketTypes bucketType, int port){

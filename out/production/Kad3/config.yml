@@ -1,6 +1,6 @@
 # Developed by Nikola Tesla
 ---
-port: 5555
+port: 6969
 buckets:
   max-size: 5
   max-stale: 2
