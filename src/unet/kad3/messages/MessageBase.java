@@ -10,6 +10,8 @@ import static unet.kad3.Build.*;
 
 public class MessageBase {
 
+
+    public static int TID_LENGTH = 6;
     protected UID uid;
     protected Method m;
     protected Type t;
