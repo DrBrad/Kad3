@@ -1,5 +1,7 @@
 package unet.kad3.kad;
 
+import unet.kad3.routing.BucketTypes;
+import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
 
 public class Kademlia {
@@ -7,14 +9,24 @@ public class Kademlia {
     private RPCServer server;
 
     public Kademlia(){
-        this(0);
+        this(BucketTypes.KADEMLIA, 0);
     }
 
     public Kademlia(int port){
-        server = new RPCServer(port);
+        this(BucketTypes.KADEMLIA, port);
+    }
 
+    public Kademlia(String bucketType, int port){
+        this(BucketTypes.valueOf(bucketType), port);
+    }
 
-
+    public Kademlia(BucketTypes bucketType, int port){
+        System.out.println("Starting with bucket method: "+bucketType.value());
+        try{
+            server = new RPCServer((RoutingTable) bucketType.getRoutingTable().newInstance(), port);
+        }catch(IllegalAccessException | InstantiationException e){
+            e.printStackTrace();
+        }
     }
 
     public void join(Node n){

@@ -1,6 +1,7 @@
 package unet.kad3.kad;
 
 import unet.kad3.messages.PingRequest;
+import unet.kad3.routing.inter.RoutingTable;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -12,8 +13,11 @@ public class RPCServer {
 
     private DatagramSocket server;
     private ConcurrentLinkedQueue<DatagramPacket> packetPool = new ConcurrentLinkedQueue<>();
+    private RoutingTable routingTable;
 
-    public RPCServer(int port){
+    public RPCServer(RoutingTable routingTable, int port){
+        this.routingTable = routingTable;
+
         try{
             server = new DatagramSocket(port);
 
@@ -43,6 +47,8 @@ public class RPCServer {
                         if(!packetPool.isEmpty()){
                             DatagramPacket packet = packetPool.poll();
 
+
+
                             //MessageBase b = new MessageBase(packet.getData());
 
                             //DECODE PACKET TO BENCODE - SEND OFF TO LISTENER
@@ -64,6 +70,9 @@ public class RPCServer {
         }
     }
 
+    private void handleMessage(DatagramPacket packet){
+        //UPDATE CONSENSUS IP...
+    }
 
     //WE REALLY JUST NEED TO FIGURE OUT IF HE IS EVEN TAKING INTO ACCOUNT THE PACKETS ORIGIN IP:PORT OR NOT...
     public void ping(InetAddress address, int port){

@@ -1,6 +1,7 @@
 package unet.kad3.routing.mainline_todo;
 
 import unet.kad3.libs.CRC32C;
+import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
@@ -10,16 +11,25 @@ import java.util.Random;
 
 import static unet.kad3.utils.Node.*;
 
-public class RoutingTable {
+public class MRoutingTable extends RoutingTable {
 
     private UID uid;
     private ArrayList<MBucket> buckets = new ArrayList<>();
 
-    public RoutingTable(){
+    public MRoutingTable(){
 
         buckets.add(new MBucket()); //CLOSEST
         buckets.add(new MBucket()); //FURTHEST
 
+    }
+
+    @Override
+    public void updatePublicIPConsensus(InetAddress source, InetAddress addr){
+    }
+
+    @Override
+    public InetAddress getConsensusExternalAddress(){
+        return null;
     }
 
     private void deriveUID(InetAddress address){
@@ -54,6 +64,7 @@ public class RoutingTable {
         uid = new UID(bid);
     }
 
+    @Override
     public synchronized void insert(Node n){
         if(n.hasSecureID()){ //NODE VERIFICATION CHECK
             if(!uid.equals(n.getUID())){ //SELF CHECK
@@ -97,6 +108,7 @@ public class RoutingTable {
         }
     }
 
+    @Override
     public synchronized int getBucketId(UID k){
         return uid.getDistance(k);//-1;
     }

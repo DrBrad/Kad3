@@ -1,6 +1,7 @@
 package unet.kad3.routing.KB;
 
 import unet.kad3.libs.CRC32C;
+import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
@@ -9,7 +10,7 @@ import java.util.*;
 
 import static unet.kad3.utils.Node.*;
 
-public class RoutingTable {
+public class KRoutingTable extends RoutingTable {
 
     private UID uid;
     private KBucket[] kBuckets;
@@ -23,7 +24,7 @@ public class RoutingTable {
         }
     };
 
-    public RoutingTable(){
+    public KRoutingTable(){
         //uid = new UID(new byte[]{ 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 });
         //use UPnP to attempt getting IP
         //If fails go to fall back method...
@@ -35,7 +36,8 @@ public class RoutingTable {
         }
     }
 
-    private void updatePublicIPConsensus(InetAddress source, InetAddress addr){
+    @Override
+    public void updatePublicIPConsensus(InetAddress source, InetAddress addr){
         //if(!AddressUtils.isGlobalUnicast(addr.getAddress()))
         //    return;
 
@@ -59,6 +61,7 @@ public class RoutingTable {
         }
     }
 
+    @Override
     public InetAddress getConsensusExternalAddress(){
         return consensusExternalAddress;
     }
@@ -108,6 +111,7 @@ public class RoutingTable {
 
 
 
+    @Override
     public synchronized void insert(Node n){
         if(n.hasSecureID() && !uid.equals(n.getUID())){
             int id = getBucketId(n.getUID());
@@ -194,6 +198,7 @@ public class RoutingTable {
     }
     */
 
+    @Override
     public synchronized int getBucketId(UID k){
         int bid = uid.getDistance(k)-1;
         return bid < 0 ? 0 : bid;
