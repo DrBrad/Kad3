@@ -8,7 +8,7 @@ public class RPCCall {
     private MessageBase req, res;
     private UID expectedUID;
     private boolean sourceWasKnownReachable, socketMismatch;
-    private long expectedRTT;
+    private long sentTime = -1, responseTime = -1, expectedRTT = -1;
     private RPCState state = RPCState.UNSENT;
 
     public RPCCall(MessageBase message){
@@ -17,6 +17,10 @@ public class RPCCall {
 
     public void setExpectedUID(UID uid){
         this.expectedUID = uid;
+    }
+
+    public UID getExpectedUID(){
+        return expectedUID;
     }
 
     public boolean knownReachableAtCreationTime(){
@@ -31,11 +35,52 @@ public class RPCCall {
         return expectedRTT;
     }
 
-    /*
+    public boolean matchesExpectedID(){
+        return expectedUID.equals(res.getUID());
+    }
+
+    public void setSocketMismatch(){
+        socketMismatch = true;
+    }
+
+    public boolean hasSocketMismatch(){
+        return socketMismatch;
+    }
+
+    public void response(MessageBase message){
+
+    }
+
+    public MessageBase.Method getMessageMethod(){
+        return req.getMethod();
+    }
+
+    public MessageBase getRequest(){
+        return req;
+    }
+
+    public MessageBase getResponse(){
+        return res;
+    }
+
+    public long getRTT(){
+        if(sentTime == -1 || responseTime == -1){
+            return -1;
+        }
+        return responseTime - sentTime;
+    }
+
+    public long getSentTime(){
+        return sentTime;
+    }
+
     public RPCState getState(){
         return state;
     }
-    */
+
+    public boolean inFlight(){
+        return state != RPCState.TIMEOUT && state != RPCState.RESPONDED;
+    }
 
     public enum RPCState {
         UNSENT,

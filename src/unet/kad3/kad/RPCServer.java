@@ -52,12 +52,18 @@ public class RPCServer {
             return;
         }
 
-
-
         RPCCall c = calls.get(new ByteWrapper(m.getTransactionID()));
 
         if(c != null){
+            if(c.getRequest().getDestinationIP().getAddress().equals(m.getOriginIP().getAddress())){
+                if(calls.remove(new ByteWrapper(m.getTransactionID()), c)){
+                    //m.setAssociatedCall(c);
+                    c.response(m);
+                    handleMessage(m);
+                }
+            }
 
+            return;
         }
         /*
         // check if this is a response to an outstanding request
@@ -115,19 +121,14 @@ public class RPCServer {
             sendMessage(err);
             return;
         }
+        */
 
-        if (msg.getType() == Type.ERR_MSG) {
-            handleMessage(msg);
+        if(m.getType() == MessageBase.Type.ERR_MSG){
+            handleMessage(m);
             return;
         }
 
-        DHT.logError("not sure how to handle message " + msg);
-        */
-
-
-
-        //handleMessage(m);
-
+        System.err.println("Unknown message type: "+m);
     }
 
     //MAKE SURE WE SET THE PUBLIC IP FOR THE MESSAGE...
