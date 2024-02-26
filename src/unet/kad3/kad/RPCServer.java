@@ -1,6 +1,6 @@
 package unet.kad3.kad;
 
-import unet.kad3.messages.MessageBase;
+import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.routing.inter.RoutingTable;
@@ -13,7 +13,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static unet.kad3.messages.MessageBase.TID_LENGTH;
+import static unet.kad3.messages.inter.MessageBase.TID_LENGTH;
 
 public class RPCServer {
 

@@ -1,4 +1,4 @@
-package unet.kad3.messages;
+package unet.kad3.messages.inter;
 
 import unet.kad3.libs.bencode.variables.BencodeObject;
 import unet.kad3.utils.net.AddressUtils;

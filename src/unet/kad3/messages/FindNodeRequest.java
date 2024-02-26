@@ -1,5 +1,7 @@
 package unet.kad3.messages;
 
+import unet.kad3.messages.inter.MessageBase;
+
 public class FindNodeRequest extends MessageBase {
 
     //ABSTRACT_LOOKUP_REQUEST

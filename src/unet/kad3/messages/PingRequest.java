@@ -1,6 +1,7 @@
 package unet.kad3.messages;
 
 import unet.kad3.libs.bencode.variables.BencodeObject;
+import unet.kad3.messages.inter.MessageBase;
 
 public class PingRequest extends MessageBase {
 
