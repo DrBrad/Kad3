@@ -1,6 +1,6 @@
 package unet.kad3.routing;
 
-import unet.kad3.routing.KB.KRoutingTable;
+import unet.kad3.routing.kb.KRoutingTable;
 import unet.kad3.routing.mainline_todo.MRoutingTable;
 
 public enum BucketTypes {

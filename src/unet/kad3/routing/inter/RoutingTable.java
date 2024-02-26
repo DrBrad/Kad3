@@ -1,6 +1,6 @@
 package unet.kad3.routing.inter;
 
-import unet.kad3.routing.KB.KBucket;
+import unet.kad3.routing.kb.KBucket;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 

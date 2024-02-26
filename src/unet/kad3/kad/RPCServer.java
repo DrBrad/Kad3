@@ -3,9 +3,7 @@ package unet.kad3.kad;
 import unet.kad3.messages.MessageBase;
 import unet.kad3.messages.MessageDecoder;
 import unet.kad3.messages.PingRequest;
-import unet.kad3.routing.KB.KBucket;
 import unet.kad3.routing.inter.RoutingTable;
-import unet.kad3.utils.Node;
 
 import java.io.IOException;
 import java.net.DatagramPacket;

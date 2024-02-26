@@ -1,4 +1,4 @@
-package unet.kad3.routing.KB;
+package unet.kad3.routing.kb;
 
 import unet.kad3.utils.Node;
 

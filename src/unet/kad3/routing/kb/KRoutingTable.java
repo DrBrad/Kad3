@@ -1,4 +1,4 @@
-package unet.kad3.routing.KB;
+package unet.kad3.routing.kb;
 
 import unet.kad3.libs.CRC32C;
 import unet.kad3.routing.inter.RoutingTable;
