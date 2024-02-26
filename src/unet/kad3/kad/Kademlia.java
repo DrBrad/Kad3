@@ -41,6 +41,4 @@ public class Kademlia {
     public void stop(){
 
     }
-
-
 }

@@ -1,4 +1,4 @@
-package unet.kad3.routing.mainline_todo;
+package unet.kad3.routing.mainline;
 
 import unet.kad3.libs.CRC32C;
 import unet.kad3.routing.inter.RoutingTable;
@@ -12,6 +12,8 @@ import java.util.Random;
 import static unet.kad3.utils.Node.*;
 
 public class MRoutingTable extends RoutingTable {
+
+    //TODO
 
     private UID uid;
     private ArrayList<MBucket> buckets = new ArrayList<>();

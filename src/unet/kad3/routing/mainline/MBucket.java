@@ -1,10 +1,12 @@
-package unet.kad3.routing.mainline_todo;
+package unet.kad3.routing.mainline;
 
 import unet.kad3.utils.Node;
 
 import java.util.ArrayList;
 
 public class MBucket {
+
+    //TODO
 
     private ArrayList<Node> nodes;
     public static final int MAX_BUCKET_SIZE = 5;
