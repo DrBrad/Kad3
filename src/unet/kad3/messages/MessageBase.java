@@ -16,7 +16,7 @@ public class MessageBase {
 
     protected byte[] tid;
 
-    protected InetAddress destinationIP, publicIP;
+    protected InetAddress destinationIP, originIP, publicIP;
     protected int destinationPort, originPort;
 
 
@@ -79,11 +79,19 @@ public class MessageBase {
     }
 
     public InetAddress getOriginIP(){
-        return publicIP;
+        return originIP;
     }
 
     public int getOriginPort(){
         return originPort;
+    }
+
+    public void setPublicIP(InetAddress address){
+        this.publicIP = address;
+    }
+
+    public InetAddress getPublicIP(){
+        return publicIP;
     }
 
 

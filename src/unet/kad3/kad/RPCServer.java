@@ -1,5 +1,7 @@
 package unet.kad3.kad;
 
+import unet.kad3.messages.MessageBase;
+import unet.kad3.messages.MessageDecoder;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.routing.inter.RoutingTable;
 
@@ -25,8 +27,18 @@ public class RPCServer {
         }
     }
 
-    private void handleMessage(DatagramPacket packet){
-        //UPDATE CONSENSUS IP...
+    private void handlePacket(DatagramPacket packet){
+        MessageBase m = new MessageDecoder(packet.getData()).parse();
+        m.setOrigin(packet.getAddress(), packet.getPort());
+    }
+
+    //MAKE SURE WE SET THE PUBLIC IP FOR THE MESSAGE...
+    private void handleMessage(MessageBase message){
+        if(message.getType() == MessageBase.Type.RSP_MSG && message.getPublicIP() != null){
+            routingTable.updatePublicIPConsensus(message.getOriginIP(), message.getPublicIP());
+        }
+
+
     }
 
     //WE REALLY JUST NEED TO FIGURE OUT IF HE IS EVEN TAKING INTO ACCOUNT THE PACKETS ORIGIN IP:PORT OR NOT...
@@ -64,27 +76,12 @@ public class RPCServer {
             }
         }).start();
 
-
         new Thread(new Runnable(){
             @Override
             public void run(){
                 while(!server.isClosed()){
                     if(!packetPool.isEmpty()){
-                        DatagramPacket packet = packetPool.poll();
-
-
-
-                        //MessageBase b = new MessageBase(packet.getData());
-
-                        //DECODE PACKET TO BENCODE - SEND OFF TO LISTENER
-
-                            /*
-                            try{
-
-                            }catch(IOException e){
-                                e.printStackTrace();
-                            }
-                            */
+                        handleMessage(packetPool.poll());
                     }
                 }
             }

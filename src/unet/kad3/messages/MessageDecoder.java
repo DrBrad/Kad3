@@ -31,12 +31,13 @@ public class MessageDecoder {
     //WE SOMEHOW SHOULD PASS THE IP AND PORT OF WHO SENT IT...
 
     private byte[] tid;
+    private byte[] b;
 
-    public MessageDecoder(){
-
+    public MessageDecoder(byte[] b){
+        this.b = b;
     }
 
-    public MessageBase decode(byte[] b){
+    public MessageBase parse(){
         BencodeObject ben = new BencodeObject(b);
 
         tid = ben.getBytes("t");
