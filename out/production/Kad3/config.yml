@@ -1,8 +1,0 @@
-# Developed by Nikola Tesla
----
-port: 6969
-buckets:
-  max-size: 5
-  max-stale: 2
-#YOU CAN ALSO DO "mainline"
-method: kademlia
