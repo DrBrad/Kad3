@@ -3,6 +3,8 @@ package unet.kad3.kad;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.utils.UID;
 
+import java.util.EnumSet;
+
 public class RPCCall {
 
     private MessageBase req, res;
@@ -80,6 +82,64 @@ public class RPCCall {
 
     public boolean inFlight(){
         return state != RPCState.TIMEOUT && state != RPCState.RESPONDED;
+    }
+
+    public void injectStall(){
+        stateTransition(EnumSet.of(RPCState.SENT), RPCState.STALLED);
+    }
+
+    private synchronized void stateTransition(EnumSet<RPCState> expected, RPCState newState){
+        RPCState oldState = state;
+
+        if(!expected.contains(oldState)){
+            return;
+        }
+
+        state = newState;
+
+        switch(newState){
+            case TIMEOUT:
+                //DHT.logDebug("RPCCall timed out ID: " + prettyPrint(reqMsg.getMTID()));
+                break;
+
+            case ERROR:
+            case RESPONDED:
+                responseTime = System.currentTimeMillis();
+                break;
+
+            case SENT:
+                break;
+
+            case STALLED:
+                break;
+
+            case UNSENT:
+                break;
+
+            default:
+                break;
+        }
+
+        /*
+        for(int i = 0; i < listeners.size(); i++){
+            RPCCallListener l = listeners.get(i);
+            l.stateTransition(this, oldState, newState);
+
+            switch(newState) {
+                case TIMEOUT:
+                    l.onTimeout(this);
+                    break;
+
+                case STALLED:
+                    l.onStall(this);
+                    break;
+
+                case RESPONDED:
+                    l.onResponse(this, rspMsg);
+                    break;
+            }
+        }
+        */
     }
 
     public enum RPCState {

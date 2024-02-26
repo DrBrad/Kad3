@@ -77,12 +77,12 @@ public class RPCServer {
             */
 
             c.setSocketMismatch();
-            //c.injectStall();
+            c.injectStall();
 
             return;
         }
 
-        if(m.getType() == MessageBase.Type.RSP_MSG && System.currentTimeMillis()-startTime > 2*60*1000){ // 2 MINUTES
+        if(m.getType() == MessageBase.Type.RSP_MSG && System.currentTimeMillis()-startTime > 120000){ // 2 MINUTES
             //ErrorMessage err = new ErrorMessage(mtid, ErrorCode.ServerError.code, "received a response message whose transaction ID did not match a pending request or transaction expired");
             //err.setDestination(msg.getOrigin());
             //sendMessage(err);
