@@ -54,6 +54,10 @@ public class RPCServer {
 
 
         RPCCall c = calls.get(m.getTransactionID());
+
+        if(c != null){
+
+        }
         /*
         // check if this is a response to an outstanding request
         RPCCall c = calls.get(new ByteWrapper(msg.getMTID()));
