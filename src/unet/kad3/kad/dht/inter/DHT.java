@@ -1,20 +1,11 @@
 package unet.kad3.kad.dht.inter;
 
-import unet.kad3.kad.RPCCall;
 import unet.kad3.messages.FindNodeRequest;
 import unet.kad3.messages.FindNodeResponse;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.messages.PingResponse;
-import unet.kad3.messages.inter.MessageBase;
-import unet.kad3.utils.ByteWrapper;
+import unet.kad3.messages.inter.MessageCallback;
 import unet.kad3.utils.Node;
-
-import java.security.NoSuchAlgorithmException;
-import java.security.SecureRandom;
-import java.util.Random;
-import java.util.concurrent.ConcurrentHashMap;
-
-import static unet.kad3.messages.inter.MessageBase.TID_LENGTH;
 
 public class DHT {
 
@@ -45,7 +36,7 @@ public class DHT {
         //node.recieved(r);
     }
 
-    public void ping(Node node){
+    public void ping(Node node, MessageCallback callback){
         PingRequest request = new PingRequest();
         request.setDestination(node.getAddress(), node.getPort());
 

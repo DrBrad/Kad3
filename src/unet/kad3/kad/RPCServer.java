@@ -1,34 +1,31 @@
 package unet.kad3.kad;
 
-import unet.kad3.kad.utils.EnqueuedSend;
+import unet.kad3.kad.calls.RPCRequestCall;
+import unet.kad3.kad.calls.RPCResponseCall;
+import unet.kad3.kad.calls.inter.RPCCall;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;
-import unet.kad3.messages.PingRequest;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.ByteWrapper;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
-import static unet.kad3.messages.inter.MessageBase.TID_LENGTH;
-
 public class RPCServer {
 
-    public static final int MAX_ACTIVE_CALLS = 20;
+    public static final int MAX_ACTIVE_CALLS = 20, TID_LENGTH = 6;
 
     private DatagramSocket server;
     //private long startTime;
     private ConcurrentLinkedQueue<DatagramPacket> receivePool;
-    private ConcurrentLinkedQueue<MessageBase> sendPool;
+    private ConcurrentLinkedQueue<RPCCall> sendPool;
 
-    private ConcurrentHashMap<ByteWrapper, MessageBase> calls;
+    private ConcurrentHashMap<ByteWrapper, RPCCall> calls;
     private RoutingTable routingTable;
     //private DHT dht;
 
@@ -184,6 +181,7 @@ public class RPCServer {
     */
 
     //WE REALLY JUST NEED TO FIGURE OUT IF HE IS EVEN TAKING INTO ACCOUNT THE PACKETS ORIGIN IP:PORT OR NOT...
+    /*
     public void ping(InetAddress address, int port){
         PingRequest pr = new PingRequest();
         pr.setUID(routingTable.getDerivedUID());
@@ -197,6 +195,7 @@ public class RPCServer {
 
         //SEND THIS SHIT...
     }
+    */
 
     public int getPort(){
         return server.getLocalPort();
@@ -231,6 +230,8 @@ public class RPCServer {
                     if(!sendPool.isEmpty()){
                         send(sendPool.poll());
                     }
+
+                    //CLEAR CALLS THAT ARE PAST RTT...
                 }
             }
         }).start();
@@ -269,20 +270,29 @@ public class RPCServer {
             routingTable.updatePublicIPConsensus(message.getOriginIP(), message.getPublicIP());
         }
 
-        //MATCH TO REQUEST... - LISTENER MAY BE A GOOD METHOD...
+        ByteWrapper tid = new ByteWrapper(message.getTransactionID());
+
+        if(calls.containsKey(tid)){
+            RPCRequestCall call = (RPCRequestCall) calls.get(tid);
+            calls.remove(tid);
+            call.getMessageCallback().onResponse(call.getMessage(), message);
+        }
     }
 
     //PROBABLY CHANGE SO THAT WE CAN SET RTT...
-    private void send(MessageBase message){
+    private void send(RPCCall call){
         try{
-            byte[] data = message.encode();
-            DatagramPacket packet = new DatagramPacket(data, 0, data.length, message.getDestinationIP(), message.getDestinationPort());
+            byte[] data = call.getMessage().encode();
+            DatagramPacket packet = new DatagramPacket(data, 0, data.length, call.getMessage().getDestinationIP(), call.getMessage().getDestinationPort());
 
-            if(message.getType() == MessageBase.Type.REQ_MSG){
+            //SET ORIGIN...?
+
+            if(call instanceof RPCRequestCall){
                 byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
-                message.setUID(routingTable.getDerivedUID());
-                message.setTransactionID(tid);
-                calls.put(new ByteWrapper(tid), message);
+                call.getMessage().setUID(routingTable.getDerivedUID());
+                call.getMessage().setTransactionID(tid);
+                calls.put(new ByteWrapper(tid), call);
+                ((RPCRequestCall) call).sent();
             }
 
             server.send(packet);
@@ -294,8 +304,12 @@ public class RPCServer {
         }
     }
 
-    public void sendMessage(MessageBase message){
+    public void sendMessage(RPCCall call){
+        if(call.getMessage().getDestinationIP() == null){
+            throw new IllegalArgumentException("Message destination set to null");
+        }
 
+        sendPool.offer(call);
     }
 
     //DONT INIT EVERY TIME...

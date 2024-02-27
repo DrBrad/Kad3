@@ -1,12 +1,58 @@
-package unet.kad3.kad;
+package unet.kad3.kad.calls.inter;
 
 import unet.kad3.messages.inter.MessageBase;
-import unet.kad3.utils.UID;
-
-import java.util.EnumSet;
+import unet.kad3.messages.inter.MessageCallback;
 
 public class RPCCall {
 
+    private MessageBase message;
+
+    public RPCCall(MessageBase message){
+        this.message = message;
+    }
+
+    public MessageBase getMessage(){
+        return message;
+    }
+
+
+    /*
+    private MessageBase req;
+    private MessageCallback callback;
+    private long sentTime = -1, responseTime = -1, expectedRTT = -1;
+
+    public RPCCall(MessageBase message, MessageCallback callback){
+        req = message;
+        this.callback = callback;
+    }
+
+    public MessageBase getRequest(){
+        return req;
+    }
+
+    public void setResponse(MessageBase message){
+        responseTime = System.currentTimeMillis();
+        callback.onResponse(req, message);
+    }
+
+    public MessageBase getResponse(){
+        return req;
+    }
+
+    public void sent(){
+        sentTime = System.currentTimeMillis();
+    }
+
+    public long getSentTime(){
+        return sentTime;
+    }
+
+    public long getResponseTime(){
+        return responseTime;
+    }
+    */
+
+    /*
     private MessageBase req, res;
     private UID expectedUID;
     private boolean sourceWasKnownReachable, socketMismatch;
@@ -151,7 +197,7 @@ public class RPCCall {
                     break;
             }
         }
-        */
+        *./
     }
 
     public enum RPCState {
@@ -162,4 +208,5 @@ public class RPCCall {
         TIMEOUT,
         RESPONDED
     }
+    */
 }

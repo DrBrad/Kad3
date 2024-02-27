@@ -1,6 +1,6 @@
 package unet.kad3.messages.inter;
 
-import unet.kad3.kad.RPCCall;
+import unet.kad3.kad.calls.RPCResponseCall;
 import unet.kad3.kad.RPCServer;
 import unet.kad3.libs.bencode.variables.BencodeObject;
 import unet.kad3.utils.net.AddressUtils;
@@ -12,8 +12,6 @@ import static unet.kad3.Build.*;
 
 public class MessageBase {
 
-
-    public static final int TID_LENGTH = 6;
     protected UID uid;
     protected Method m;
     protected Type t;
@@ -23,7 +21,7 @@ public class MessageBase {
     protected InetAddress destinationIP, originIP, publicIP; //LOTS OF QUESTIONS WITH THIS...
     protected int destinationPort, originPort;
 
-    protected RPCCall associatedCall;
+    protected RPCResponseCall associatedCall;
     private RPCServer server;
 
 
@@ -127,11 +125,11 @@ public class MessageBase {
         return t;
     }
 
-    public void setAssociatedCall(RPCCall associatedCall){
+    public void setAssociatedCall(RPCResponseCall associatedCall){
         this.associatedCall = associatedCall;
     }
 
-    public RPCCall getAssociatedCall(){
+    public RPCResponseCall getAssociatedCall(){
         return associatedCall;
     }
 

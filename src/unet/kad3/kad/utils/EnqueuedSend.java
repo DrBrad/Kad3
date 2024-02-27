@@ -1,6 +1,6 @@
 package unet.kad3.kad.utils;
 
-import unet.kad3.kad.RPCCall;
+import unet.kad3.kad.calls.RPCResponseCall;
 import unet.kad3.messages.FindNodeResponse;
 import unet.kad3.messages.PingResponse;
 import unet.kad3.messages.inter.MessageBase;
@@ -9,10 +9,10 @@ import java.net.InetAddress;
 
 public class EnqueuedSend {
 
-    private RPCCall call;
+    private RPCResponseCall call;
     private MessageBase message;
 
-    public EnqueuedSend(RPCCall call, MessageBase message){
+    public EnqueuedSend(RPCResponseCall call, MessageBase message){
         this.call = call;
         this.message = message;
 
@@ -40,7 +40,7 @@ public class EnqueuedSend {
         return call != null;
     }
 
-    public RPCCall getAssociatedCall(){
+    public RPCResponseCall getAssociatedCall(){
         return call;
     }
 
