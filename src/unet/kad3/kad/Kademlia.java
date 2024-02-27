@@ -48,7 +48,7 @@ public class Kademlia {
 
     public void setDHT(DHT dht){
         this.dht = dht;
-        //dht.setServer(server);
+        dht.start();
     }
 
     public DHT getDHT(){

@@ -23,13 +23,12 @@ public class RPCServer {
     public static final int MAX_ACTIVE_CALLS = 20, TID_LENGTH = 6;
 
     private DatagramSocket server;
-    //private long startTime;
-    private ConcurrentLinkedQueue<DatagramPacket> receivePool;
-    private ConcurrentLinkedQueue<RPCCall> sendPool;
+    private final ConcurrentLinkedQueue<DatagramPacket> receivePool;
+    private final ConcurrentLinkedQueue<RPCCall> sendPool;
 
-    private ConcurrentHashMap<ByteWrapper, RPCCall> calls;
-    private List<RequestListener> requestListeners;
-    private RoutingTable routingTable;
+    private final ConcurrentHashMap<ByteWrapper, RPCCall> calls;
+    private final List<RequestListener> requestListeners;
+    private final RoutingTable routingTable;
 
     public RPCServer(RoutingTable routingTable, int port){
         this.routingTable = routingTable;
@@ -38,7 +37,6 @@ public class RPCServer {
         sendPool = new ConcurrentLinkedQueue<>();
         calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
         requestListeners = new ArrayList<>();
-        //startTime = System.currentTimeMillis();
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
 
@@ -311,8 +309,6 @@ public class RPCServer {
             }
 
             server.send(packet);
-
-            //SAVE REQUEST TO SENT WAITING FOR RECEIVED
 
         }catch(IOException | NoSuchAlgorithmException e){
             e.printStackTrace();

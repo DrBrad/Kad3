@@ -2,6 +2,7 @@ package unet.kad3.kad.dht.inter;
 
 import unet.kad3.kad.RPCServer;
 import unet.kad3.kad.calls.RPCRequestCall;
+import unet.kad3.kad.calls.RPCResponseCall;
 import unet.kad3.messages.FindNodeRequest;
 import unet.kad3.messages.FindNodeResponse;
 import unet.kad3.messages.PingRequest;
@@ -18,7 +19,14 @@ public class DHT implements RPCServer.RequestListener {
 
     public DHT(RPCServer server){
         this.server = server;
+    }
+
+    public void start(){
         server.addRequestListener(this);
+    }
+
+    public void stop(){
+        server.removeRequestListener(this);
     }
 
     //WE PROBABLY WANT TO SET THE SERVER SOMEHOW...
@@ -50,9 +58,9 @@ public class DHT implements RPCServer.RequestListener {
 
         PingResponse response = new PingResponse(request.getTransactionID());
         response.setDestination(request.getOriginIP(), request.getOriginPort());
-        //request.getServer().sendMessage(response);
 
-        //node.recieved(r);
+        RPCResponseCall call = new RPCResponseCall(response);
+        server.sendMessage(call);
     }
 
     public void ping(Node node, MessageCallback callback){
