@@ -19,12 +19,11 @@ import static unet.kad3.messages.inter.MessageBase.TID_LENGTH;
 
 public class RPCServer {
 
-    public static final int MAX_ACTIVE_CALLS = 20;
     private DatagramSocket server;
-    private long startTime;
+    //private long startTime;
     private ConcurrentLinkedQueue<DatagramPacket> receivePool;
-    private ConcurrentLinkedQueue<EnqueuedSend> sendPool;
-    private Map<ByteWrapper, RPCCall> calls;
+    private ConcurrentLinkedQueue<MessageBase> sendPool;
+    //private Map<ByteWrapper, RPCCall> calls;
     private RoutingTable routingTable;
     //private DHT dht;
 
@@ -33,8 +32,8 @@ public class RPCServer {
         //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
         sendPool = new ConcurrentLinkedQueue<>();
-        calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
-        startTime = System.currentTimeMillis();
+        //calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
+        //startTime = System.currentTimeMillis();
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
 
@@ -45,6 +44,8 @@ public class RPCServer {
         }
     }
 
+    /*
+    //WE MAY WANT TO DO THIS DIFFERENTLY...
     private void receive(DatagramPacket packet){
         if(packet.getPort() == 0){
             return;
@@ -52,6 +53,15 @@ public class RPCServer {
 
         MessageBase m = new MessageDecoder(packet.getData()).parse();
         //m.setOrigin(packet.getAddress(), packet.getPort());
+
+        m.setOrigin(packet.getAddress(), packet.getPort());
+        m.setServer(this);
+
+        // just respond to incoming requests, no need to match them to pending requests
+        if(m.getType() == MessageBase.Type.REQ_MSG){
+            handleMessage(m);
+            return;
+        }
 
         if(m.getType() == MessageBase.Type.RSP_MSG && m.getTransactionID().length != TID_LENGTH){
             byte[] tid = m.getTransactionID();
@@ -82,7 +92,7 @@ public class RPCServer {
                 err.setDestination(c.getRequest().getDestination());
                 sendMessage(err);
             }
-            */
+            *./
 
             c.setSocketMismatch();
             c.injectStall();
@@ -139,7 +149,7 @@ public class RPCServer {
 
 		drainTrigger.run();
 	}
-    */
+    *./
 
     //METHOD TO SEND TO ANOTHER NODE - DHT CAN CALL THIS
     public void sendMessage(MessageBase message){
@@ -160,10 +170,13 @@ public class RPCServer {
                 es.getAssociatedCall().sent(this);
             }
 
+            calls.put(new ByteWrapper(null), es.getAssociatedCall());
+
         }catch(IOException e){
             e.printStackTrace();
         }
     }
+    */
 
     //WE REALLY JUST NEED TO FIGURE OUT IF HE IS EVEN TAKING INTO ACCOUNT THE PACKETS ORIGIN IP:PORT OR NOT...
     public void ping(InetAddress address, int port){
@@ -220,5 +233,55 @@ public class RPCServer {
 
     public void stop(){
         server.close();
+    }
+
+    private void receive(DatagramPacket packet){
+        if(packet.getPort() == 0){
+            return;
+        }
+
+        MessageBase m = new MessageDecoder(packet.getData()).parse();
+        m.setOrigin(packet.getAddress(), packet.getPort());
+        m.setServer(this);
+
+        switch(m.getType()){
+            case REQ_MSG:
+                request(m);
+                break;
+
+            case RSP_MSG:
+                response(m);
+                break;
+        }
+    }
+
+    private void request(MessageBase message){
+        //DHT HANDLE???
+    }
+
+    private void response(MessageBase message){
+        if(message.getPublicIP() != null){
+            routingTable.updatePublicIPConsensus(message.getOriginIP(), message.getPublicIP());
+        }
+
+        //MATCH TO REQUEST... - LISTENER MAY BE A GOOD METHOD...
+    }
+
+    //PROBABLY CHANGE SO THAT WE CAN SET RTT...
+    private void send(MessageBase message){
+        try{
+            byte[] data = message.encode();
+            DatagramPacket packet = new DatagramPacket(data, 0, data.length, message.getDestinationIP(), message.getDestinationPort());
+            server.send(packet);
+
+            //SAVE REQUEST TO SENT WAITING FOR RECEIVED
+
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
+    public void sendMessage(MessageBase message){
+
     }
 }

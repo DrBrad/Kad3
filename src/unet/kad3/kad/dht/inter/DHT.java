@@ -1,20 +1,29 @@
 package unet.kad3.kad.dht.inter;
 
+import unet.kad3.kad.RPCCall;
 import unet.kad3.messages.FindNodeRequest;
 import unet.kad3.messages.FindNodeResponse;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.messages.PingResponse;
+import unet.kad3.messages.inter.MessageBase;
+import unet.kad3.utils.ByteWrapper;
+import unet.kad3.utils.Node;
+
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DHT {
 
-    public static final int THREAD_POOL_SIZE = 3;
+    public static final int MAX_ACTIVE_CALLS = 20, THREAD_POOL_SIZE = 3;
     public static final long BUCKET_REFRESH_TIME = 3600000;
 
-    public DHT(){
+    private ConcurrentHashMap<ByteWrapper, MessageBase> calls;
 
+    public DHT(){
+        calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
     }
 
-    //PROBABLY MOVE THESE CALL FUNCTIONS OUT OF ROUTING TABLE...
+    //WE PROBABLY WANT TO SET THE SERVER SOMEHOW...
+
     public void ping(PingRequest request){
         /*
         if (!isRunning()) {
@@ -29,9 +38,18 @@ public class DHT {
 
         PingResponse response = new PingResponse(request.getTransactionID());
         response.setDestination(request.getOriginIP(), request.getOriginPort());
-        request.getServer().sendMessage(response);
+        //request.getServer().sendMessage(response);
 
         //node.recieved(r);
+    }
+
+    public void ping(Node node){
+        PingRequest request = new PingRequest();
+        request.setDestination(node.getAddress(), node.getPort());
+        //request.setUID(routingTable.getDerivedUID());
+        request.setTransactionID(null); //DEFINE THIS...
+        calls.put(new ByteWrapper(null), request);
+        //server.sendMessage(request);
     }
 
     public void findNode(FindNodeRequest request){
@@ -62,6 +80,6 @@ public class DHT {
         FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
 
         response.setDestination(request.getOriginIP(), request.getOriginPort());
-        request.getServer().sendMessage(response);
+        //request.getServer().sendMessage(response);
     }
 }
