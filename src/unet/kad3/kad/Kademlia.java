@@ -15,25 +15,21 @@ public class Kademlia {
     //ALLOW DHT SPECIFICATION
 
     public Kademlia(){
-        this(BucketTypes.KADEMLIA, 0);
+        this(BucketTypes.KADEMLIA.getRoutingTable(), 0);
     }
 
     public Kademlia(int port){
-        this(BucketTypes.KADEMLIA, port);
+        this(BucketTypes.KADEMLIA.getRoutingTable(), port);
     }
 
     public Kademlia(String bucketType, int port){
-        this(BucketTypes.fromString(bucketType), port);
+        this(BucketTypes.fromString(bucketType).getRoutingTable(), port);
     }
 
-    public Kademlia(BucketTypes bucketType, int port){
-        System.out.println("Starting with bucket type: "+bucketType.value());
-        try{
-            server = new RPCServer((RoutingTable) bucketType.getRoutingTable().newInstance(), port);
-            server.start();
-        }catch(IllegalAccessException | InstantiationException e){
-            e.printStackTrace();
-        }
+    public Kademlia(RoutingTable routingTable, int port){
+        System.out.println("Starting with bucket type: "+routingTable.getClass().getSimpleName());
+        server = new RPCServer(routingTable, port);
+        server.start();
     }
 
     public void join(InetAddress address, int port){

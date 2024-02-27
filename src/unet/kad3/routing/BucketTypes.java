@@ -1,5 +1,6 @@
 package unet.kad3.routing;
 
+import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.routing.kb.KRoutingTable;
 import unet.kad3.routing.mainline.MRoutingTable;
 
@@ -11,8 +12,8 @@ public enum BucketTypes {
             return "MainLine";
         }
         @Override
-        public Class<?> getRoutingTable(){
-            return MRoutingTable.class;
+        public RoutingTable getRoutingTable(){
+            return new MRoutingTable();
         }
     }, KADEMLIA {
         @Override
@@ -20,8 +21,8 @@ public enum BucketTypes {
             return "Kademlia";
         }
         @Override
-        public Class<?> getRoutingTable(){
-            return KRoutingTable.class;
+        public RoutingTable getRoutingTable(){
+            return new KRoutingTable();
         }
     };
 
@@ -38,7 +39,7 @@ public enum BucketTypes {
         return null;
     }
 
-    public Class<?> getRoutingTable(){
+    public RoutingTable getRoutingTable(){
         return null;
     }
 }

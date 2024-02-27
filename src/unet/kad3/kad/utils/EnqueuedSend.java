@@ -17,7 +17,7 @@ public class EnqueuedSend {
         this.message = message;
 
         if(message.getUID() == null){
-            message.setUID(); //DERIVE UUID < FROM THE RPCServer...
+            //message.setUID(); //DERIVE UUID < FROM THE RPCServer...
         }
 
         if((message instanceof PingResponse || message instanceof FindNodeResponse) && message.getPublicIP() == null){
