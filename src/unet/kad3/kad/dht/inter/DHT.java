@@ -11,10 +11,17 @@ import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.inter.MessageCallback;
 import unet.kad3.utils.Node;
 
+import java.util.Timer;
+import java.util.TimerTask;
+
 public class DHT implements RPCServer.RequestListener {
 
     public static final int THREAD_POOL_SIZE = 3;
     public static final long BUCKET_REFRESH_TIME = 3600000;
+
+    private Timer refreshTimer;
+    private TimerTask refreshTimerTask;
+
     private RPCServer server;
 
     public DHT(RPCServer server){
@@ -23,10 +30,28 @@ public class DHT implements RPCServer.RequestListener {
 
     public void start(){
         server.addRequestListener(this);
+        startRefresh();
     }
 
     public void stop(){
         server.removeRequestListener(this);
+        refreshTimerTask.cancel();
+        refreshTimer.cancel();
+        refreshTimer.purge();
+    }
+
+    public void startRefresh(){
+        if(refreshTimer == null && refreshTimerTask == null){
+            refreshTimer = new Timer(true);
+            refreshTimerTask = new TimerTask(){
+                @Override
+                public void run(){
+
+                }
+            };
+
+            refreshTimer.schedule(refreshTimerTask, 0, BUCKET_REFRESH_TIME); //MAKE DELAY LONG, HOWEVER PERIOD AROUND 1 HOUR
+        }
     }
 
     //WE PROBABLY WANT TO SET THE SERVER SOMEHOW...
