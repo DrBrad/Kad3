@@ -36,8 +36,6 @@ public class Main {
 
     //WOULD IT BE BETTER TO NOT USE POOLS BUT JUST TAKE EACH PACKET AND SEND IT TO A NEW THREAD...?
 
-    //ALLOW CLASS FOR BUCKET TYPE...
-
     public static void main(String[] args){
         try{
             Kademlia k = new Kademlia("Kademlia", 8080);

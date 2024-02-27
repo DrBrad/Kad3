@@ -29,7 +29,7 @@ public class DHT {
 
         PingResponse response = new PingResponse(request.getTransactionID());
         response.setDestination(request.getOriginIP(), request.getOriginPort());
-        //request.getServer().sendMessage(response);
+        request.getServer().sendMessage(response);
 
         //node.recieved(r);
     }
@@ -62,5 +62,6 @@ public class DHT {
         FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
 
         response.setDestination(request.getOriginIP(), request.getOriginPort());
+        request.getServer().sendMessage(response);
     }
 }
