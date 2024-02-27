@@ -15,7 +15,6 @@ public class MRoutingTable extends RoutingTable {
 
     //TODO
 
-    private UID uid;
     private ArrayList<MBucket> buckets = new ArrayList<>();
     private InetAddress consensusExternalAddress;
 
@@ -36,8 +35,8 @@ public class MRoutingTable extends RoutingTable {
     }
 
     @Override
-    public void deriveUID(InetAddress address){
-        byte[] ip = address.getAddress();
+    public void deriveUID(){
+        byte[] ip = consensusExternalAddress.getAddress();
         byte[] mask = ip.length == 4 ? V4_MASK : V6_MASK;
 
         for(int i = 0; i < ip.length; i++){

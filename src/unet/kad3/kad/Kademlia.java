@@ -1,5 +1,6 @@
 package unet.kad3.kad;
 
+import unet.kad3.kad.dht.inter.DHT;
 import unet.kad3.routing.BucketTypes;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
@@ -8,10 +9,10 @@ import java.net.InetAddress;
 
 public class Kademlia {
 
-    public static final int THREAD_POOL_SIZE = 3;
-    public static final long BUCKET_REFRESH_TIME = 3600000;
-
     private RPCServer server;
+    private DHT dht;
+
+    //ALLOW DHT SPECIFICATION
 
     public Kademlia(){
         this(BucketTypes.KADEMLIA, 0);
@@ -47,6 +48,14 @@ public class Kademlia {
 
     private void bind(int port){
 
+    }
+
+    public void setDHT(DHT dht){
+        this.dht = dht;
+    }
+
+    public DHT getDHT(){
+        return dht;
     }
 
     public void stop(){

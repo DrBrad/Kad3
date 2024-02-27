@@ -27,28 +27,23 @@ public class RPCServer {
     private ConcurrentLinkedQueue<EnqueuedSend> sendPool;
     private Map<ByteWrapper, RPCCall> calls;
     private RoutingTable routingTable;
-
-    private UID derivedUID;
+    //private DHT dht;
 
     public RPCServer(RoutingTable routingTable, int port){
         this.routingTable = routingTable;
+        //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
         sendPool = new ConcurrentLinkedQueue<>();
         calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
         startTime = System.currentTimeMillis();
 
-        //DERIVE UID
-        //derivedId = dh_table.getNode().registerId();
+        routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
 
         try{
             server = new DatagramSocket(port);
         }catch(IOException e){
             e.printStackTrace();
         }
-    }
-
-    private UID getDerivedUID(){
-        return derivedUID;
     }
 
     private void receive(DatagramPacket packet){
@@ -174,7 +169,7 @@ public class RPCServer {
     //WE REALLY JUST NEED TO FIGURE OUT IF HE IS EVEN TAKING INTO ACCOUNT THE PACKETS ORIGIN IP:PORT OR NOT...
     public void ping(InetAddress address, int port){
         PingRequest pr = new PingRequest();
-        pr.setUID(derivedUID);
+        pr.setUID(routingTable.getDerivedUID());
         //pr.setTransactionID(); //THIS IS IMPORTANT
         pr.setDestination(address, port);
 

@@ -1,6 +1,5 @@
 package unet.kad3.routing.inter;
 
-import unet.kad3.routing.kb.KBucket;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
@@ -8,13 +7,19 @@ import java.net.InetAddress;
 
 public abstract class RoutingTable {
 
+    public UID uid;
+
     public abstract void updatePublicIPConsensus(InetAddress source, InetAddress addr);
 
     public abstract InetAddress getConsensusExternalAddress();
 
     public abstract void insert(Node n);
 
-    public abstract void deriveUID(InetAddress address);
+    public abstract void deriveUID();
+
+    public UID getDerivedUID(){
+        return uid;
+    }
 
     /*
     public synchronized List<Node> getAllNodes(){
