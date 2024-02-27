@@ -3,6 +3,7 @@ package unet.kad3;
 import unet.kad3.kad.Kademlia;
 import unet.kad3.kad.dht.KDHT;
 import unet.kad3.messages.PingRequest;
+import unet.kad3.routing.kb.KRoutingTable;
 
 import java.net.InetAddress;
 
