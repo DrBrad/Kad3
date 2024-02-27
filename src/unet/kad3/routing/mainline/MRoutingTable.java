@@ -34,7 +34,8 @@ public class MRoutingTable extends RoutingTable {
         return null;
     }
 
-    private void deriveUID(InetAddress address){
+    @Override
+    public void deriveUID(InetAddress address){
         byte[] ip = address.getAddress();
         byte[] mask = ip.length == 4 ? V4_MASK : V6_MASK;
 

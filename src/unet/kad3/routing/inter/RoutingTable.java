@@ -19,6 +19,8 @@ public abstract class RoutingTable {
 
     public abstract void insert(Node n);
 
+    public abstract void deriveUID(InetAddress address);
+
     /*
     public synchronized List<Node> getAllNodes(){
         ArrayList<Node> nodes = new ArrayList<>();

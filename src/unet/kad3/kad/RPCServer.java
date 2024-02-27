@@ -1,16 +1,17 @@
 package unet.kad3.kad;
 
+import unet.kad3.kad.utils.EnqueuedSend;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.ByteWrapper;
+import unet.kad3.utils.UID;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.time.Duration;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -22,14 +23,22 @@ public class RPCServer {
     public static final int MAX_ACTIVE_CALLS = 20;
     private DatagramSocket server;
     private long startTime;
-    private ConcurrentLinkedQueue<DatagramPacket> packetPool = new ConcurrentLinkedQueue<>();
+    private ConcurrentLinkedQueue<DatagramPacket> receivePool;
+    private ConcurrentLinkedQueue<EnqueuedSend> sendPool;
     private Map<ByteWrapper, RPCCall> calls;
     private RoutingTable routingTable;
 
+    private UID derivedUID;
+
     public RPCServer(RoutingTable routingTable, int port){
         this.routingTable = routingTable;
+        receivePool = new ConcurrentLinkedQueue<>();
+        sendPool = new ConcurrentLinkedQueue<>();
         calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
         startTime = System.currentTimeMillis();
+
+        //DERIVE UID
+        //derivedId = dh_table.getNode().registerId();
 
         try{
             server = new DatagramSocket(port);
@@ -38,7 +47,11 @@ public class RPCServer {
         }
     }
 
-    private void handlePacket(DatagramPacket packet){
+    private UID getDerivedUID(){
+        return derivedUID;
+    }
+
+    private void receive(DatagramPacket packet){
         if(packet.getPort() == 0){
             return;
         }
@@ -48,7 +61,8 @@ public class RPCServer {
 
         if(m.getType() == MessageBase.Type.RSP_MSG && m.getTransactionID().length != TID_LENGTH){
             byte[] tid = m.getTransactionID();
-            //DHT.logDebug("response with invalid mtid length received: "+ Utils.prettyPrint(mtid));
+            System.err.println("Response with invalid Transaction ID length received: ");//HEX PRINT TID
+
             //ErrorMessage err = new ErrorMessage(mtid, ErrorCode.ServerError.code, "received a response with a transaction id length of "+mtid.length+" bytes, expected [implementation-specific]: "+MTID_LENGTH+" bytes");
             //err.setDestination(msg.getOrigin());
             //sendMessage(err);
@@ -60,7 +74,7 @@ public class RPCServer {
         if(c != null){
             if(c.getRequest().getDestinationIP().equals(m.getOriginIP())){
                 if(calls.remove(new ByteWrapper(m.getTransactionID()), c)){
-                    //m.setAssociatedCall(c);
+                    m.setAssociatedCall(c);
                     c.response(m);
                     handleMessage(m);
                 }
@@ -107,12 +121,65 @@ public class RPCServer {
         //msg.apply(dh_table);
     }
 
+    private void call(RPCCall call, byte[] tid){
+        call.getRequest().setTransactionID(tid);
+        //call.addListener(rpcListener);
+
+        if(!call.knownReachableAtCreationTime()){
+            //timeoutFilter.registerCall(call);
+        }
+
+        sendPool.offer(new EnqueuedSend(call, call.getRequest()));
+    }
+
+    /*
+    public void doCall(RPCCall c) {
+
+		MessageBase req = c.getRequest();
+		if(req.getServer() == null)
+			req.setServer(this);
+
+		enqueueEventConsumers.forEach(callback -> callback.accept(c));
+
+		call_queue.add(c);
+
+		drainTrigger.run();
+	}
+    */
+
+    //METHOD TO SEND TO ANOTHER NODE - DHT CAN CALL THIS
+    public void sendMessage(MessageBase message){
+        if(message.getDestinationIP() == null){
+            throw new IllegalArgumentException("Message destination set to null");
+        }
+
+        sendPool.offer(new EnqueuedSend(null, message));
+    }
+
+    public void send(EnqueuedSend es){
+        try{
+            byte[] data = es.encode();
+            DatagramPacket packet = new DatagramPacket(data, 0, data.length, es.getDestinationIP(), es.getDestinationPort());
+            server.send(packet); //MAY BE RESPONSE SO WE NEED TO FIX THIS...
+
+            if(es.getAssociatedCall() != null){ //NOT SURE WHY THIS WOULD EVER OCCUR...
+                es.getAssociatedCall().sent(this);
+            }
+
+        }catch(IOException e){
+            e.printStackTrace();
+        }
+    }
+
     //WE REALLY JUST NEED TO FIGURE OUT IF HE IS EVEN TAKING INTO ACCOUNT THE PACKETS ORIGIN IP:PORT OR NOT...
     public void ping(InetAddress address, int port){
         PingRequest pr = new PingRequest();
-        //pr.setUID(deriveID);
+        pr.setUID(derivedUID);
         //pr.setTransactionID(); //THIS IS IMPORTANT
         pr.setDestination(address, port);
+
+        new RPCCall(pr);
+        //doCall(new RPCCall(pr));
         //SET IP AS MY PUBLIC IP...
         //SET MY PORT
 
@@ -133,7 +200,7 @@ public class RPCServer {
                     try{
                         DatagramPacket packet = new DatagramPacket(new byte[65535], 65535);
                         server.receive(packet);
-                        packetPool.offer(packet);
+                        receivePool.offer(packet);
                     }catch(IOException e){
                         e.printStackTrace();
                     }
@@ -145,8 +212,12 @@ public class RPCServer {
             @Override
             public void run(){
                 while(!server.isClosed()){
-                    if(!packetPool.isEmpty()){
-                        handlePacket(packetPool.poll());
+                    if(!receivePool.isEmpty()){
+                        receive(receivePool.poll());
+                    }
+
+                    if(!sendPool.isEmpty()){
+                        send(sendPool.poll());
                     }
                 }
             }
@@ -154,6 +225,6 @@ public class RPCServer {
     }
 
     public void stop(){
-
+        server.close();
     }
 }

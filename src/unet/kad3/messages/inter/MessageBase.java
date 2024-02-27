@@ -1,5 +1,6 @@
 package unet.kad3.messages.inter;
 
+import unet.kad3.kad.RPCCall;
 import unet.kad3.libs.bencode.variables.BencodeObject;
 import unet.kad3.utils.net.AddressUtils;
 import unet.kad3.utils.UID;
@@ -18,8 +19,10 @@ public class MessageBase {
 
     protected byte[] tid;
 
-    protected InetAddress destinationIP, originIP, publicIP;
+    protected InetAddress destinationIP, originIP, publicIP; //LOTS OF QUESTIONS WITH THIS...
     protected int destinationPort, originPort;
+
+    protected RPCCall associatedCall;
 
 
 
@@ -37,7 +40,25 @@ public class MessageBase {
 
 
     public BencodeObject getBencode(){
-        return null;
+        BencodeObject ben = getBencode();
+        ben.put("t", tid); //TRANSACTION ID
+        ben.put("v", VERSION_CODE); //VERSION
+
+        ben.put(Type.TYPE_KEY, getType().getRPCTypeName());
+
+        switch(t){
+            case REQ_MSG:
+                ben.put(t.getRPCTypeName(), m.getRPCName());
+                break;
+
+            case RSP_MSG:
+                if(destinationIP != null){
+                    ben.put("ip", AddressUtils.packAddress(publicIP, originPort)); //PACK MY IP ADDRESS
+                }
+                break;
+        }
+
+        return ben;
     }
 
 
@@ -106,31 +127,20 @@ public class MessageBase {
         return t;
     }
 
+    public void setAssociatedCall(RPCCall associatedCall){
+        this.associatedCall = associatedCall;
+    }
+
+    public RPCCall getAssociatedCall(){
+        return associatedCall;
+    }
 
 
     //GET / SET RPCServer...?
 
     //RENAME THIS SHIT AS WELL
-    public BencodeObject encode(){
-        BencodeObject ben = getBencode();
-        ben.put("t", tid); //TRANSACTION ID
-        ben.put("v", VERSION_CODE); //VERSION
-
-        ben.put(Type.TYPE_KEY, getType().getRPCTypeName());
-
-        switch(t){
-            case REQ_MSG:
-                ben.put(t.getRPCTypeName(), m.getRPCName());
-                break;
-
-            case RSP_MSG:
-                if(destinationIP != null){
-                    ben.put("ip", AddressUtils.packAddress(publicIP, originPort)); //PACK MY IP ADDRESS
-                }
-                break;
-        }
-
-        return ben;
+    public byte[] encode(){
+        return getBencode().encode();
     }
 
     public static enum Method {

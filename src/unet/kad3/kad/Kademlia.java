@@ -4,7 +4,12 @@ import unet.kad3.routing.BucketTypes;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
 
+import java.net.InetAddress;
+
 public class Kademlia {
+
+    public static final int THREAD_POOL_SIZE = 3;
+    public static final long BUCKET_REFRESH_TIME = 3600000;
 
     private RPCServer server;
 
@@ -30,8 +35,14 @@ public class Kademlia {
         }
     }
 
-    public void join(Node n){
+    public void join(InetAddress address, int port){
+        //join(new Node(address, port));
+    }
 
+    public void join(Node n){
+        //NODE LOOKUP
+        //JOIN
+        //startRefresh();
     }
 
     private void bind(int port){
@@ -39,6 +50,6 @@ public class Kademlia {
     }
 
     public void stop(){
-
+        server.stop();
     }
 }

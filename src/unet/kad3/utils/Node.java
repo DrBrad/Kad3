@@ -3,6 +3,7 @@ package unet.kad3.utils;
 import unet.kad3.libs.CRC32C;
 
 import java.net.InetAddress;
+import java.util.Random;
 
 public class Node {
 
@@ -17,13 +18,13 @@ public class Node {
     private int stale;
     private long lastSeen;
 
-/*
+    //FOR TESTING PURPOSES ONLY...
+    /*
     public Node(InetAddress address, int port){
         this.address = address;
         this.port = port;
 
-
-        //THIS WILL LIKELY BE MOVED STRAIT THE FUCK TO THE ROUTING TABLE AS WE DONT MAKE ID's FOR OTHERS...
+        //THIS WILL LIKELY BE MOVED STRAIT THE FUCK TO THE ROUTING TABLE AS WE DON'T MAKE ID's FOR OTHERS...
 
         //DERIVE THE KEY...
         byte[] ip = address.getAddress();
@@ -56,7 +57,7 @@ public class Node {
         bid[19] = (byte) (rand & 0xFF);
         uid = new UID(bid);
     }
-*/
+    */
 
     //CREATE NODE BY HEX AS WELL...
 

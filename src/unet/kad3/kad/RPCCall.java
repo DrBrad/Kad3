@@ -88,6 +88,18 @@ public class RPCCall {
         stateTransition(EnumSet.of(RPCState.SENT), RPCState.STALLED);
     }
 
+    public void sent(RPCServer server){
+        sentTime = System.currentTimeMillis();
+
+        stateTransition(EnumSet.of(RPCState.UNSENT), RPCState.SENT);
+
+        //scheduler = server.getDHT().getScheduler();
+
+        // spread out the stalls by +- 1ms to reduce lock contention
+        //int smear = ThreadLocalRandom.current().nextInt(-1000, 1000);
+        //timeoutTimer = scheduler.schedule(this::checkStallOrTimeout, expectedRTT*1000+smear, TimeUnit.MICROSECONDS);
+    }
+
     private synchronized void stateTransition(EnumSet<RPCState> expected, RPCState newState){
         RPCState oldState = state;
 
