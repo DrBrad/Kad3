@@ -250,6 +250,10 @@ public class RPCServer {
         requestListeners.remove(listener);
     }
 
+    public RoutingTable getRoutingTable(){
+        return routingTable;
+    }
+
     private void receive(DatagramPacket packet){
         if(packet.getPort() == 0){
             return;

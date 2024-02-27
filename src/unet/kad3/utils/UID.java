@@ -9,8 +9,16 @@ public class UID {
     public static final int ID_LENGTH = 160;
     protected byte[] bid;
 
-    public UID(){
+    public UID(String s){
+        int len = s.length();
+        if(s.length()/2 != ID_LENGTH){
+            throw new IllegalArgumentException("Node ID is not correct length");
+        }
 
+        bid = new byte[ID_LENGTH];
+        for(int i = 0; i < len; i += 2){
+            bid[i/2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)+Character.digit(s.charAt(i+1), 16));
+        }
     }
 
     public UID(byte[] bid){

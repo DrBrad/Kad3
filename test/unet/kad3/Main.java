@@ -44,9 +44,10 @@ public class Main {
         try{
             Kademlia k = new Kademlia("Kademlia", 8080);
             k.setDHT(new KDHT());
+            System.out.println(k.getDHT().getUID());
 
             /*
-            k.getDHT().ping(new Node(new UID(""), InetAddress.getByName("127.0.0.1"), 8080), new MessageCallback(){
+            k.getDHT().ping(new Node("", InetAddress.getByName("127.0.0.1"), 8080), new MessageCallback(){
                 @Override
                 public void onResponse(MessageBase request, MessageBase response){
 

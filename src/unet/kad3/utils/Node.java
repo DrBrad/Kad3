@@ -61,6 +61,10 @@ public class Node {
 
     //CREATE NODE BY HEX AS WELL...
 
+    public Node(String uid, InetAddress address, int port){
+        this(new UID(uid), address, port);
+    }
+
     public Node(UID uid, InetAddress address, int port){
         this.uid = uid;
         this.address = address;

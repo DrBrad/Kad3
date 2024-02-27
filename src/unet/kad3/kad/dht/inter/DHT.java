@@ -10,6 +10,7 @@ import unet.kad3.messages.PingResponse;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.inter.MessageCallback;
 import unet.kad3.utils.Node;
+import unet.kad3.utils.UID;
 
 import java.util.Timer;
 import java.util.TimerTask;
@@ -21,12 +22,7 @@ public class DHT implements RPCServer.RequestListener {
 
     private Timer refreshTimer;
     private TimerTask refreshTimerTask;
-
     private RPCServer server;
-
-    public DHT(RPCServer server){
-        this.server = server;
-    }
 
     public void start(){
         server.addRequestListener(this);
@@ -103,6 +99,14 @@ public class DHT implements RPCServer.RequestListener {
         refreshTimerTask.cancel();
         refreshTimer.cancel();
         refreshTimer.purge();
+    }
+
+    public void setServer(RPCServer server){
+        this.server = server;
+    }
+
+    public UID getUID(){
+        return server.getRoutingTable().getDerivedUID();
     }
 
     //WE PROBABLY WANT TO SET THE SERVER SOMEHOW...
