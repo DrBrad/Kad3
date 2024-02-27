@@ -102,4 +102,8 @@ public class DHT implements RPCServer.RequestListener {
         response.setDestination(request.getOriginIP(), request.getOriginPort());
         //request.getServer().sendMessage(response);
     }
+
+    public void findNode(Node node, MessageCallback callback){
+
+    }
 }
