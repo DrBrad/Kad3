@@ -24,6 +24,10 @@ public class DHT implements RPCServer.RequestListener {
     private TimerTask refreshTimerTask;
     private RPCServer server;
 
+    public DHT(RPCServer server){
+        this.server = server;
+    }
+
     public void start(){
         server.addRequestListener(this);
         startRefresh();
@@ -99,10 +103,6 @@ public class DHT implements RPCServer.RequestListener {
         refreshTimerTask.cancel();
         refreshTimer.cancel();
         refreshTimer.purge();
-    }
-
-    public void setServer(RPCServer server){
-        this.server = server;
     }
 
     public UID getUID(){

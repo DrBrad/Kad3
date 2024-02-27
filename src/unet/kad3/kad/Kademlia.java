@@ -1,10 +1,13 @@
 package unet.kad3.kad;
 
+import com.sun.jdi.InvocationException;
 import unet.kad3.kad.dht.inter.DHT;
 import unet.kad3.routing.BucketTypes;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
 
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 
 public class Kademlia {
@@ -46,10 +49,17 @@ public class Kademlia {
 
     }
 
-    public void setDHT(DHT dht){
-        this.dht = dht;
-        dht.setServer(server);
-        dht.start();
+    public void setDHT(Class<?> c){
+        if(DHT.class.isAssignableFrom(c)){
+            try{
+                Constructor<?> constructor = c.getConstructor(RPCServer.class);
+                dht = (DHT) constructor.newInstance(server);
+                dht.start();
+
+            }catch(NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e){
+                e.printStackTrace();
+            }
+        }
     }
 
     public DHT getDHT(){

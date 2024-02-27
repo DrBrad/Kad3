@@ -43,7 +43,7 @@ public class Main {
     public static void main(String[] args){
         try{
             Kademlia k = new Kademlia("Kademlia", 8080);
-            k.setDHT(new KDHT());
+            k.setDHT(KDHT.class);
             System.out.println(k.getDHT().getUID());
 
             /*
