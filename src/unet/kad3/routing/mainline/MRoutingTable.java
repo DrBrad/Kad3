@@ -17,6 +17,7 @@ public class MRoutingTable extends RoutingTable {
 
     private UID uid;
     private ArrayList<MBucket> buckets = new ArrayList<>();
+    private InetAddress consensusExternalAddress;
 
     public MRoutingTable(){
 
@@ -71,7 +72,7 @@ public class MRoutingTable extends RoutingTable {
     public synchronized void insert(Node n){
         if(n.hasSecureID()){ //NODE VERIFICATION CHECK
             if(!uid.equals(n.getUID())){ //SELF CHECK
-                int b = getBucketId(n.getUID());
+                int b = getBucketUID(n.getUID());
 
                 //ARE WE EVEN CHECKING FOR IP/PORT MATCHES...
 
@@ -91,7 +92,7 @@ public class MRoutingTable extends RoutingTable {
                         for(int i = buckets.get(buckets.size()-2).size()-1; i > -1; i--){
                             //for(Node ns : buckets.get(buckets.size()-2).list()){
                             Node ns = buckets.get(buckets.size()-2).get(i);
-                            int j = getBucketId(ns.getUID());
+                            int j = getBucketUID(ns.getUID());
                             if(j == buckets.size()-1){
                                 buckets.get(buckets.size()-2).remove(ns);
                                 buckets.get(buckets.size()-1).insert(ns);
@@ -112,7 +113,7 @@ public class MRoutingTable extends RoutingTable {
     }
 
     @Override
-    public synchronized int getBucketId(UID k){
+    public synchronized int getBucketUID(UID k){
         return uid.getDistance(k);//-1;
     }
 

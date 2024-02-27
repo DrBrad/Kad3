@@ -8,11 +8,6 @@ import java.net.InetAddress;
 
 public abstract class RoutingTable {
 
-    private UID uid;
-    private KBucket[] kBuckets;
-
-    private InetAddress consensusExternalAddress;
-
     public abstract void updatePublicIPConsensus(InetAddress source, InetAddress addr);
 
     public abstract InetAddress getConsensusExternalAddress();
@@ -31,5 +26,7 @@ public abstract class RoutingTable {
     }
     */
 
-    public abstract int getBucketId(UID k);
+    public abstract int getBucketUID(UID k);
+
+
 }

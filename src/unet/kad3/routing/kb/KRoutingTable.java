@@ -1,6 +1,10 @@
 package unet.kad3.routing.kb;
 
 import unet.kad3.libs.CRC32C;
+import unet.kad3.messages.FindNodeRequest;
+import unet.kad3.messages.FindNodeResponse;
+import unet.kad3.messages.PingRequest;
+import unet.kad3.messages.PingResponse;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
@@ -14,7 +18,6 @@ public class KRoutingTable extends RoutingTable {
 
     private UID uid;
     private KBucket[] kBuckets;
-
     private InetAddress consensusExternalAddress;
 
     private LinkedHashMap<InetAddress, InetAddress> originPairs  = new LinkedHashMap<>(64, 0.75f, true){
@@ -99,20 +102,10 @@ public class KRoutingTable extends RoutingTable {
         uid = new UID(bid);
     }
 
-
-
-
-
-
-
-
-
-
-
     @Override
     public synchronized void insert(Node n){
         if(n.hasSecureID() && !uid.equals(n.getUID())){
-            int id = getBucketId(n.getUID());
+            int id = getBucketUID(n.getUID());
             //boolean containsIP = getAllNodes().contains(n);
 
             boolean containsIP = false;
@@ -197,10 +190,66 @@ public class KRoutingTable extends RoutingTable {
     */
 
     @Override
-    public synchronized int getBucketId(UID k){
+    public synchronized int getBucketUID(UID k){
         int bid = uid.getDistance(k)-1;
         return bid < 0 ? 0 : bid;
     }
+
+
+
+    //PROBABLY MOVE THESE CALL FUNCTIONS OUT OF ROUTING TABLE...
+    public void ping(PingRequest request){
+        /*
+        if (!isRunning()) {
+            return;
+        }
+
+        // ignore requests we get from ourself
+        if (node.isLocalId(r.getID())) {
+            return;
+        }
+        */
+
+        PingResponse response = new PingResponse(request.getTransactionID());
+        response.setDestination(request.getOriginIP(), request.getOriginPort());
+        //request.getServer().sendMessage(response);
+
+        //node.recieved(r);
+    }
+
+    public void findNode(FindNodeRequest request){
+        /*
+        if (!isRunning()) {
+            return;
+        }
+
+        // ignore requests we get from ourself
+        if (node.isLocalId(r.getID())) {
+            return;
+        }
+
+        AbstractLookupResponse response;
+        if(r instanceof FindNodeRequest)
+            response = new FindNodeResponse(r.getMTID());
+        else
+            response = new UnknownTypeResponse(r.getMTID());
+
+        populateResponse(r.getTarget(), response, r.doesWant4() ? DHTConstants.MAX_ENTRIES_PER_BUCKET : 0, r.doesWant6() ? DHTConstants.MAX_ENTRIES_PER_BUCKET : 0);
+
+        response.setDestination(r.getOrigin());
+        r.getServer().sendMessage(response);
+
+        node.recieved(r);
+        */
+
+        FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
+
+        response.setDestination(request.getOriginIP(), request.getOriginPort());
+    }
+
+
+
+
 
 
     @Override
