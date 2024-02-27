@@ -11,6 +11,8 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.InetAddress;
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
@@ -19,11 +21,14 @@ import static unet.kad3.messages.inter.MessageBase.TID_LENGTH;
 
 public class RPCServer {
 
+    public static final int MAX_ACTIVE_CALLS = 20;
+
     private DatagramSocket server;
     //private long startTime;
     private ConcurrentLinkedQueue<DatagramPacket> receivePool;
     private ConcurrentLinkedQueue<MessageBase> sendPool;
-    //private Map<ByteWrapper, RPCCall> calls;
+
+    private ConcurrentHashMap<ByteWrapper, MessageBase> calls;
     private RoutingTable routingTable;
     //private DHT dht;
 
@@ -32,7 +37,7 @@ public class RPCServer {
         //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
         sendPool = new ConcurrentLinkedQueue<>();
-        //calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
+        calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
         //startTime = System.currentTimeMillis();
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
@@ -272,16 +277,32 @@ public class RPCServer {
         try{
             byte[] data = message.encode();
             DatagramPacket packet = new DatagramPacket(data, 0, data.length, message.getDestinationIP(), message.getDestinationPort());
+
+            if(message.getType() == MessageBase.Type.REQ_MSG){
+                byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
+                message.setUID(routingTable.getDerivedUID());
+                message.setTransactionID(tid);
+                calls.put(new ByteWrapper(tid), message);
+            }
+
             server.send(packet);
 
             //SAVE REQUEST TO SENT WAITING FOR RECEIVED
 
-        }catch(IOException e){
+        }catch(IOException | NoSuchAlgorithmException e){
             e.printStackTrace();
         }
     }
 
     public void sendMessage(MessageBase message){
 
+    }
+
+    //DONT INIT EVERY TIME...
+    private byte[] generateTransactionID()throws NoSuchAlgorithmException {
+        byte[] tid = new byte[TID_LENGTH];
+        SecureRandom r = SecureRandom.getInstance("SHA1PRNG");
+        r.nextBytes(tid);
+        return tid;
     }
 }

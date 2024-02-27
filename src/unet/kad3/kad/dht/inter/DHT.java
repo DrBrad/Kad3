@@ -9,17 +9,19 @@ import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.utils.ByteWrapper;
 import unet.kad3.utils.Node;
 
+import java.security.NoSuchAlgorithmException;
+import java.security.SecureRandom;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
+
+import static unet.kad3.messages.inter.MessageBase.TID_LENGTH;
 
 public class DHT {
 
-    public static final int MAX_ACTIVE_CALLS = 20, THREAD_POOL_SIZE = 3;
+    public static final int THREAD_POOL_SIZE = 3;
     public static final long BUCKET_REFRESH_TIME = 3600000;
 
-    private ConcurrentHashMap<ByteWrapper, MessageBase> calls;
-
     public DHT(){
-        calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
     }
 
     //WE PROBABLY WANT TO SET THE SERVER SOMEHOW...
@@ -46,9 +48,7 @@ public class DHT {
     public void ping(Node node){
         PingRequest request = new PingRequest();
         request.setDestination(node.getAddress(), node.getPort());
-        //request.setUID(routingTable.getDerivedUID());
-        request.setTransactionID(null); //DEFINE THIS...
-        calls.put(new ByteWrapper(null), request);
+
         //server.sendMessage(request);
     }
 
