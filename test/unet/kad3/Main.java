@@ -4,6 +4,7 @@ import unet.kad3.kad.Kademlia;
 import unet.kad3.kad.dht.KDHT;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.routing.kb.KRoutingTable;
+import unet.kad3.utils.Node;
 
 import java.net.InetAddress;
 
@@ -41,9 +42,9 @@ public class Main {
             Kademlia k = new Kademlia("Kademlia", 8080);
             k.setDHT(new KDHT());
 
-            PingRequest request = new PingRequest();
-            request.setDestination(InetAddress.getByName("127.0.0.1"), 8080);
-            k.getDHT().ping(request);
+            //PingRequest request = new PingRequest();
+            //request.setDestination(InetAddress.getByName("127.0.0.1"), 8080);
+            //k.getDHT().ping(new Node());
 
         }catch(Exception e){
             e.printStackTrace();

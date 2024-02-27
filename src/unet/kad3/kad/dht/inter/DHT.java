@@ -1,23 +1,42 @@
 package unet.kad3.kad.dht.inter;
 
+import unet.kad3.kad.RPCServer;
+import unet.kad3.kad.calls.RPCRequestCall;
 import unet.kad3.messages.FindNodeRequest;
 import unet.kad3.messages.FindNodeResponse;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.messages.PingResponse;
+import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.inter.MessageCallback;
 import unet.kad3.utils.Node;
 
-public class DHT {
+public class DHT implements RPCServer.RequestListener {
 
     public static final int THREAD_POOL_SIZE = 3;
     public static final long BUCKET_REFRESH_TIME = 3600000;
+    private RPCServer server;
 
-    public DHT(){
+    public DHT(RPCServer server){
+        this.server = server;
+        server.addRequestListener(this);
     }
 
     //WE PROBABLY WANT TO SET THE SERVER SOMEHOW...
 
-    public void ping(PingRequest request){
+    @Override
+    public void onRequest(MessageBase message){
+        switch(message.getMethod()){
+            case PING:
+                ping((PingRequest) message);
+                break;
+
+            case FIND_NODE:
+                findNode((FindNodeRequest) message);
+                break;
+        }
+    }
+
+    private void ping(PingRequest request){
         /*
         if (!isRunning()) {
             return;
@@ -40,10 +59,12 @@ public class DHT {
         PingRequest request = new PingRequest();
         request.setDestination(node.getAddress(), node.getPort());
 
-        //server.sendMessage(request);
+        RPCRequestCall call = new RPCRequestCall(request);
+        call.setMessageCallback(callback);
+        server.sendMessage(call);
     }
 
-    public void findNode(FindNodeRequest request){
+    private void findNode(FindNodeRequest request){
         /*
         if (!isRunning()) {
             return;

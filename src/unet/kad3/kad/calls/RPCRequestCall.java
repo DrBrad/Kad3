@@ -1,6 +1,7 @@
 package unet.kad3.kad.calls;
 
 import unet.kad3.kad.calls.inter.RPCCall;
+import unet.kad3.kad.dht.inter.DHT;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.inter.MessageCallback;
 

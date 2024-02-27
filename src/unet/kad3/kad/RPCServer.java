@@ -13,6 +13,8 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -26,8 +28,8 @@ public class RPCServer {
     private ConcurrentLinkedQueue<RPCCall> sendPool;
 
     private ConcurrentHashMap<ByteWrapper, RPCCall> calls;
+    private List<RequestListener> requestListeners;
     private RoutingTable routingTable;
-    //private DHT dht;
 
     public RPCServer(RoutingTable routingTable, int port){
         this.routingTable = routingTable;
@@ -35,6 +37,7 @@ public class RPCServer {
         receivePool = new ConcurrentLinkedQueue<>();
         sendPool = new ConcurrentLinkedQueue<>();
         calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
+        requestListeners = new ArrayList<>();
         //startTime = System.currentTimeMillis();
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
@@ -241,6 +244,14 @@ public class RPCServer {
         server.close();
     }
 
+    public void addRequestListener(RequestListener listener){
+        requestListeners.add(listener);
+    }
+
+    public void removeRequestListener(RequestListener listener){
+        requestListeners.remove(listener);
+    }
+
     private void receive(DatagramPacket packet){
         if(packet.getPort() == 0){
             return;
@@ -262,7 +273,11 @@ public class RPCServer {
     }
 
     private void request(MessageBase message){
-        //DHT HANDLE???
+        if(!requestListeners.isEmpty()){
+            for(RequestListener listener : requestListeners){
+                listener.onRequest(message);
+            }
+        }
     }
 
     private void response(MessageBase message){
@@ -318,5 +333,10 @@ public class RPCServer {
         SecureRandom r = SecureRandom.getInstance("SHA1PRNG");
         r.nextBytes(tid);
         return tid;
+    }
+
+    public interface RequestListener {
+
+        void onRequest(MessageBase message);
     }
 }
