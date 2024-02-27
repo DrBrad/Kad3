@@ -30,6 +30,9 @@ public class DHT implements RPCServer.RequestListener {
 
     public void start(){
         server.addRequestListener(this);
+
+        //WE CAN START BY ATTEMPTING UPnP TO GET EXTERNAL IP OTHERWISE CONSENSUS IS NEEDED...
+
         startRefresh();
     }
 
