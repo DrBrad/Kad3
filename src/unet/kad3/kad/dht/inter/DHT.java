@@ -35,23 +35,74 @@ public class DHT implements RPCServer.RequestListener {
 
     public void stop(){
         server.removeRequestListener(this);
-        refreshTimerTask.cancel();
-        refreshTimer.cancel();
-        refreshTimer.purge();
+        stopRefresh();
     }
 
-    public void startRefresh(){
+    private void startRefresh(){
         if(refreshTimer == null && refreshTimerTask == null){
             refreshTimer = new Timer(true);
             refreshTimerTask = new TimerTask(){
                 @Override
                 public void run(){
 
+                    /*
+                    for(int i = 1; i < KID.ID_LENGTH; i++){
+                        if(routingTable.getBucketSize(i) < KBucket.MAX_BUCKET_SIZE){ //IF THE BUCKET IS FULL WHY SEARCH... WE CAN REFILL BY OTHER PEER PINGS AND LOOKUPS...
+                            final KID k = routingTable.getLocal().getKID().generateNodeIdByDistance(i);
+
+                            final List<Node> closest = routingTable.findClosest(k, KBucket.MAX_BUCKET_SIZE);
+                            if(!closest.isEmpty()){
+                                exe.submit(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        new NodeLookupMessage(routingTable, closest, k).execute();
+                                    }
+                                });
+                            }
+                        }
+                    }
+
+                    exe.submit(new Runnable(){
+                        @Override
+                        public void run(){
+                            List<Contact> contacts = routingTable.getAllUnqueriedNodes();
+                            if(!contacts.isEmpty()){
+                                for(Contact c : contacts){
+                                    new PingMessage(routingTable, c.getNode()).execute();
+                                }
+                            }
+                        }
+                    });
+
+                    storage.evict();
+
+                    final List<String> data = storage.getRenewal();
+                    if(!data.isEmpty()){
+                        for(final String r : data){
+                            exe.submit(new Runnable(){
+                                @Override
+                                public void run(){
+                                    try{
+                                        new StoreMessage(KademliaNode.this, r).execute();
+                                    }catch(NoSuchAlgorithmException e){
+                                        e.printStackTrace();
+                                    }
+                                }
+                            });
+                        }
+                    }
+                    */
                 }
             };
 
             refreshTimer.schedule(refreshTimerTask, 0, BUCKET_REFRESH_TIME); //MAKE DELAY LONG, HOWEVER PERIOD AROUND 1 HOUR
         }
+    }
+
+    private void stopRefresh(){
+        refreshTimerTask.cancel();
+        refreshTimer.cancel();
+        refreshTimer.purge();
     }
 
     //WE PROBABLY WANT TO SET THE SERVER SOMEHOW...
@@ -91,10 +142,7 @@ public class DHT implements RPCServer.RequestListener {
     public void ping(Node node, MessageCallback callback){
         PingRequest request = new PingRequest();
         request.setDestination(node.getAddress(), node.getPort());
-
-        RPCRequestCall call = new RPCRequestCall(request);
-        call.setMessageCallback(callback);
-        server.sendMessage(call);
+        sendMessage(request, callback);
     }
 
     private void findNode(FindNodeRequest request){
@@ -129,6 +177,14 @@ public class DHT implements RPCServer.RequestListener {
     }
 
     public void findNode(Node node, MessageCallback callback){
+        FindNodeRequest request = new FindNodeRequest();
+        request.setDestination(node.getAddress(), node.getPort());
+        sendMessage(request, callback);
+    }
 
+    private void sendMessage(MessageBase message, MessageCallback callback){
+        RPCRequestCall call = new RPCRequestCall(message);
+        call.setMessageCallback(callback);
+        server.sendMessage(call);
     }
 }
