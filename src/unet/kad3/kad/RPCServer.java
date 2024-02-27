@@ -6,7 +6,6 @@ import unet.kad3.messages.MessageDecoder;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.ByteWrapper;
-import unet.kad3.utils.UID;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -37,7 +36,7 @@ public class RPCServer {
         calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
         startTime = System.currentTimeMillis();
 
-        routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
+        //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
 
         try{
             server = new DatagramSocket(port);

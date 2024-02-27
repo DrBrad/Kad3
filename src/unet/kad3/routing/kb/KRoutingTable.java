@@ -54,7 +54,14 @@ public class KRoutingTable extends RoutingTable {
                     }
                 }
 
-                consensusExternalAddress = k.get(res);
+                //CHANGE - TO AUTO UPDATE UID BASED OFF OF IP CONSENSUS CHANGES
+                if(consensusExternalAddress != k.get(res)){
+                    //UPDATE UID
+                    consensusExternalAddress = k.get(res);
+                    deriveUID();
+                }
+
+                //consensusExternalAddress = k.get(res);
             }
         }
     }
