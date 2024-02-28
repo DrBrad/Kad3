@@ -169,6 +169,7 @@ public class DHT implements RPCServer.RequestListener {
 
         PingResponse response = new PingResponse(request.getTransactionID());
         response.setDestination(request.getOriginIP(), request.getOriginPort());
+        response.setTransactionID(request.getTransactionID());
 
         RPCResponseCall call = new RPCResponseCall(response);
         server.sendMessage(call);
@@ -206,8 +207,8 @@ public class DHT implements RPCServer.RequestListener {
         */
 
         FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
-
         response.setDestination(request.getOriginIP(), request.getOriginPort());
+        response.setTransactionID(request.getTransactionID());
         //request.getServer().sendMessage(response);
     }
 
