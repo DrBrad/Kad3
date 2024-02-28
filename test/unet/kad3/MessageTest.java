@@ -1,9 +1,8 @@
 package unet.kad3;
 
-import unet.kad3.messages.FindNodeRequest;
-import unet.kad3.messages.MessageDecoder;
-import unet.kad3.messages.PingRequest;
+import unet.kad3.messages.*;
 import unet.kad3.messages.inter.MessageBase;
+import unet.kad3.messages.MessageDecoder;
 import unet.kad3.utils.UID;
 
 import java.security.MessageDigest;
@@ -23,26 +22,42 @@ public class MessageTest {
     public static void pingRequest(UID uid){
         PingRequest r = new PingRequest(new byte[TID_LENGTH]);
         r.setUID(uid);
-        System.out.println("PING MESSAGE:");
+        System.out.println("PING REQUEST:");
         System.out.println(r);
+        checkRequest(r);
 
-        byte[] b = r.encode();
-        MessageBase m = new MessageDecoder(b).parse();
-        System.out.println("Encoding > Decode Match: "+matches(b, m.encode()));
-        System.out.println();
-        System.out.println();
-        System.out.println();
+        pingResponse(r, uid);
     }
 
     public static void findNodeRequest(UID uid){
         FindNodeRequest r = new FindNodeRequest(new byte[TID_LENGTH]);
         r.setUID(uid);
         r.setTarget(new UID("5a3ce9c14e7a08645677bbd1cfe7d8f956d53256"));
-        System.out.println("FIND_NODE MESSAGE:");
+        System.out.println("FIND_NODE REQUEST:");
         System.out.println(r);
+        checkRequest(r);
+    }
 
-        byte[] b = r.encode();
-        MessageBase m = new MessageDecoder(b).parse();
+    public static void pingResponse(PingRequest m, UID uid){
+        PingResponse r = new PingResponse(m.getTransactionID());
+        r.setUID(uid);
+        System.out.println("PING RESPONSE:");
+        System.out.println(r);
+        checkResponse(m.getMethod(), r);
+    }
+
+    public static void checkRequest(MessageBase m){
+        byte[] b = m.encode();
+        m = new MessageDecoder(b).decodeRequest();
+        System.out.println("Encoding > Decode Match: "+matches(b, m.encode()));
+        System.out.println();
+        System.out.println();
+        System.out.println();
+    }
+
+    public static void checkResponse(MessageBase.Method t, MessageBase m){
+        byte[] b = m.encode();
+        m = new MessageDecoder(b).decodeResponse(t);
         System.out.println("Encoding > Decode Match: "+matches(b, m.encode()));
         System.out.println();
         System.out.println();

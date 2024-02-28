@@ -1,7 +1,5 @@
 package unet.kad3.messages.inter;
 
-import unet.kad3.kad.calls.RPCResponseCall;
-import unet.kad3.kad.RPCServer;
 import unet.kad3.libs.bencode.variables.BencodeObject;
 import unet.kad3.utils.net.AddressUtils;
 import unet.kad3.utils.UID;
@@ -21,9 +19,6 @@ public class MessageBase {
     protected InetAddress destinationIP, originIP, publicIP; //LOTS OF QUESTIONS WITH THIS...
     protected int destinationPort, originPort;
 
-    protected RPCResponseCall associatedCall;
-    private RPCServer server;
-
 
 
     //TRANSACTION ID
@@ -36,8 +31,6 @@ public class MessageBase {
         this.m = m;
         this.t = t;
     }
-
-
 
     public BencodeObject getBencode(){
         BencodeObject ben = new BencodeObject();
@@ -54,10 +47,12 @@ public class MessageBase {
                 break;
 
             case RSP_MSG:
+                ben.put("r", new BencodeObject());
                 if(destinationIP != null){
-                    ben.put("ip", AddressUtils.packAddress(publicIP, originPort)); //PACK MY IP ADDRESS
-                    ben.put("r", new BencodeObject());
+                    //DOES THIS GO INTO R????
+                    ben.getBencodeObject("r").put("ip", AddressUtils.packAddress(publicIP, originPort)); //PACK MY IP ADDRESS
                 }
+                ben.getBencodeObject("r").put("id", uid.getBytes());
                 break;
         }
 
@@ -118,30 +113,12 @@ public class MessageBase {
         return publicIP;
     }
 
-
-
     public Method getMethod(){
         return m;
     }
 
     public Type getType(){
         return t;
-    }
-
-    public void setAssociatedCall(RPCResponseCall associatedCall){
-        this.associatedCall = associatedCall;
-    }
-
-    public RPCResponseCall getAssociatedCall(){
-        return associatedCall;
-    }
-
-    public void setServer(RPCServer server){
-        this.server = server;
-    }
-
-    public RPCServer getServer(){
-        return server;
     }
 
     //GET / SET RPCServer...?

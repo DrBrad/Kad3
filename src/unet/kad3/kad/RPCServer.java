@@ -266,40 +266,38 @@ public class RPCServer {
             return;
         }
 
-        MessageBase m = new MessageDecoder(packet.getData()).parse();
-        m.setOrigin(packet.getAddress(), packet.getPort());
-        m.setServer(this);
+        MessageDecoder d = new MessageDecoder(packet.getData());
 
-        switch(m.getType()){
+        switch(d.getType()){
             case REQ_MSG:
-                request(m);
+                if(!requestListeners.isEmpty()){
+                    MessageBase m = d.decodeRequest();
+                    m.setOrigin(packet.getAddress(), packet.getPort());
+
+                    for(RequestListener listener : requestListeners){
+                        listener.onRequest(m);
+                    }
+                }
                 break;
 
             case RSP_MSG:
-                response(m);
+                ByteWrapper tid = new ByteWrapper(d.getTransactionID());
+
+                if(!calls.containsKey(tid)){
+                    return;
+                }
+
+                RPCRequestCall call = (RPCRequestCall) calls.get(tid);
+                calls.remove(tid);
+                MessageBase m = d.decodeResponse(call.getMessage().getMethod());
+                m.setOrigin(packet.getAddress(), packet.getPort());
+
+                if(m.getPublicIP() != null){
+                    routingTable.updatePublicIPConsensus(m.getOriginIP(), m.getPublicIP());
+                }
+
+                call.getMessageCallback().onResponse(call.getMessage(), m);
                 break;
-        }
-    }
-
-    private void request(MessageBase message){
-        if(!requestListeners.isEmpty()){
-            for(RequestListener listener : requestListeners){
-                listener.onRequest(message);
-            }
-        }
-    }
-
-    private void response(MessageBase message){
-        if(message.getPublicIP() != null){
-            routingTable.updatePublicIPConsensus(message.getOriginIP(), message.getPublicIP());
-        }
-
-        ByteWrapper tid = new ByteWrapper(message.getTransactionID());
-
-        if(calls.containsKey(tid)){
-            RPCRequestCall call = (RPCRequestCall) calls.get(tid);
-            calls.remove(tid);
-            call.getMessageCallback().onResponse(call.getMessage(), message);
         }
     }
 

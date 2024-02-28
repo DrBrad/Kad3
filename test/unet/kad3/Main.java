@@ -1,19 +1,10 @@
 package unet.kad3;
 
 import unet.kad3.kad.Kademlia;
-import unet.kad3.kad.dht.KDHT;
-import unet.kad3.messages.MessageDecoder;
-import unet.kad3.messages.PingRequest;
-import unet.kad3.messages.inter.MessageBase;
-import unet.kad3.messages.inter.MessageCallback;
-import unet.kad3.routing.kb.KRoutingTable;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
 import java.net.Inet4Address;
-import java.net.InetAddress;
-
-import static unet.kad3.kad.RPCServer.TID_LENGTH;
 
 public class Main {
 

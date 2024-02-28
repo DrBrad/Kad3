@@ -23,6 +23,18 @@ public class FindNodeRequest extends MessageBase {
         this.target = target;
     }
 
+    protected void decode(BencodeObject ben){
+        target = new UID(ben.getBytes("target"));
+
+        //UNSURE IF THIS IS VALID OR ALLOWED
+                /*
+                if(ben.getBencodeObject("a").containsKey("wants")){
+                    ((FindNodeRequest) message).setWantIPv4(ben.getBencodeObject("a").getBencodeArray("wants").contains("n4"));
+                    ((FindNodeRequest) message).setWantIPv4(ben.getBencodeObject("a").getBencodeArray("wants").contains("n6"));
+                }
+                */
+    }
+
     /*
     public boolean wantsIPv4(){
         return ipv4;

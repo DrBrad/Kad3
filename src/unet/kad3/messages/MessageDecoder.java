@@ -1,6 +1,10 @@
 package unet.kad3.messages;
 
 import unet.kad3.libs.bencode.variables.BencodeObject;
+import unet.kad3.messages.FindNodeRequest;
+import unet.kad3.messages.FindNodeResponse;
+import unet.kad3.messages.PingRequest;
+import unet.kad3.messages.PingResponse;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.utils.UID;
 
@@ -32,40 +36,24 @@ public class MessageDecoder {
     //WE SOMEHOW SHOULD PASS THE IP AND PORT OF WHO SENT IT...
 
     private byte[] tid;
-    private byte[] b;
+    private MessageBase.Type type;
+    private BencodeObject ben;
 
     public MessageDecoder(byte[] b){
-        this.b = b;
-    }
-
-    public MessageBase parse(){
-        BencodeObject ben = new BencodeObject(b);
-
+        ben = new BencodeObject(b);
         tid = ben.getBytes("t");
-        MessageBase.Type t = MessageBase.Type.fromRPCTypeName(ben.getString("y"));
-
-        //VERSION...
-        //ben.getString("v");
-
-        switch(t){
-            case REQ_MSG:
-                return decodeRequest(ben);
-
-            case RSP_MSG:
-                return decodeResponse(ben);
-
-            case ERR_MSG:
-
-                break;
-
-            default:
-                return null; //INVALID
-        }
-
-        return null;
+        type = MessageBase.Type.fromRPCTypeName(ben.getString("y"));
     }
 
-    private MessageBase decodeRequest(BencodeObject ben){
+    public byte[] getTransactionID(){
+        return tid;
+    }
+
+    public MessageBase.Type getType(){
+        return type;
+    }
+
+    public MessageBase decodeRequest(){
         MessageBase message;
         MessageBase.Method m = MessageBase.Method.fromRPCName(ben.getString("q"));
 
@@ -76,17 +64,7 @@ public class MessageDecoder {
 
             case FIND_NODE:
                 message = new FindNodeRequest(tid);
-
-                ((FindNodeRequest) message).setTarget(new UID(ben.getBencodeObject("a").getBytes("target")));
-
-                //UNSURE IF THIS IS VALID OR ALLOWED
-                /*
-                if(ben.getBencodeObject("a").containsKey("wants")){
-                    ((FindNodeRequest) message).setWantIPv4(ben.getBencodeObject("a").getBencodeArray("wants").contains("n4"));
-                    ((FindNodeRequest) message).setWantIPv4(ben.getBencodeObject("a").getBencodeArray("wants").contains("n6"));
-                }
-                */
-
+                ((FindNodeRequest) message).decode(ben.getBencodeObject("a"));
                 break;
 
             case UNKNOWN:
@@ -100,17 +78,17 @@ public class MessageDecoder {
         return message;
     }
 
-    private MessageBase decodeResponse(BencodeObject ben){
+    public MessageBase decodeResponse(MessageBase.Method method){
         MessageBase message;
-        MessageBase.Method m = MessageBase.Method.valueOf(ben.getString("q"));
 
-        switch(m){
+        switch(method){
             case PING:
                 message = new PingResponse(tid);
                 break;
 
             case FIND_NODE:
                 message = new FindNodeResponse(tid);
+                ((FindNodeResponse) message).decode(ben.getBencodeObject("r"));
                 break;
 
             case UNKNOWN:
@@ -119,10 +97,8 @@ public class MessageDecoder {
         }
 
         //MAYBE DO THIS BETTER?
-        message.setUID(new UID(ben.getBencodeObject("a").getBytes("id")));
+        message.setUID(new UID(ben.getBencodeObject("r").getBytes("id")));
         //message.setVersion(ben.getDouble("v"));
-
-
 
 
         //msg.setUID();

@@ -11,8 +11,6 @@ public class PingResponse extends MessageBase {
 
     @Override
     public BencodeObject getBencode(){
-        BencodeObject ben = new BencodeObject();
-        ben.put("id", uid.getBytes());
-        return ben;
+        return super.getBencode();
     }
 }

@@ -13,8 +13,6 @@ public class PingRequest extends MessageBase {
         super(tid, Method.PING, Type.REQ_MSG);
     }
 
-    //DECODE...
-
     @Override
     public BencodeObject getBencode(){
         //BencodeObject ben = super.getBencode();
