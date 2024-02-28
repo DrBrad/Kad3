@@ -1,6 +1,6 @@
 package unet.kad3.kad;
 
-import com.sun.jdi.InvocationException;
+import unet.kad3.kad.dht.KDHT;
 import unet.kad3.kad.dht.inter.DHT;
 import unet.kad3.routing.BucketTypes;
 import unet.kad3.routing.inter.RoutingTable;
@@ -9,6 +9,7 @@ import unet.kad3.utils.Node;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
+import java.net.SocketException;
 
 public class Kademlia {
 
@@ -18,21 +19,23 @@ public class Kademlia {
     //ALLOW DHT SPECIFICATION
 
     public Kademlia(){
-        this(BucketTypes.KADEMLIA.getRoutingTable(), 0);
+        this(BucketTypes.KADEMLIA.getRoutingTable());
     }
 
-    public Kademlia(int port){
-        this(BucketTypes.KADEMLIA.getRoutingTable(), port);
+    /*
+    public Kademlia(){
+        this(BucketTypes.KADEMLIA.getRoutingTable());
+    }
+    */
+
+    public Kademlia(String bucketType){
+        this(BucketTypes.fromString(bucketType).getRoutingTable());
     }
 
-    public Kademlia(String bucketType, int port){
-        this(BucketTypes.fromString(bucketType).getRoutingTable(), port);
-    }
-
-    public Kademlia(RoutingTable routingTable, int port){
+    public Kademlia(RoutingTable routingTable){
         System.out.println("Starting with bucket type: "+routingTable.getClass().getSimpleName());
-        server = new RPCServer(routingTable, port);
-        server.start();
+        server = new RPCServer(routingTable);
+        //dht = new KDHT(server);
     }
 
     public void join(InetAddress address, int port){
@@ -45,15 +48,29 @@ public class Kademlia {
         //startRefresh();
     }
 
-    private void bind(int port){
+    public void bind(int port)throws SocketException {
+        if(server.isRunning()){
+            throw new IllegalArgumentException("Server is already running.");
+        }
+        server.start(port);
 
+        if(dht != null){
+            dht.start();
+            return;
+        }
+        dht = new KDHT(server);
+        dht.start();
     }
 
     public void setDHT(Class<?> c){
         if(DHT.class.isAssignableFrom(c)){
             try{
                 Constructor<?> constructor = c.getConstructor(RPCServer.class);
-                dht = (DHT) constructor.newInstance(server);
+                DHT dht = (DHT) constructor.newInstance(server);
+
+                if(this.dht != null){
+                    this.dht.stop();
+                }
                 dht.start();
 
             }catch(NoSuchMethodException | IllegalAccessException | InstantiationException | InvocationTargetException e){

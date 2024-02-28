@@ -43,8 +43,10 @@ public class Main {
 
     public static void main(String[] args){
         try{
-            Kademlia k = new Kademlia("Kademlia", 8080);
-            k.setDHT(KDHT.class);
+            Kademlia k = new Kademlia("Kademlia");
+            //k.setDHT(KDHT.class);
+            k.bind(8080);
+            //k.join();
 
             UID uid = k.getDHT().getUID();
             System.out.println(uid);

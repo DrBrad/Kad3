@@ -11,6 +11,7 @@ import unet.kad3.utils.ByteWrapper;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class RPCServer {
     private final List<RequestListener> requestListeners;
     private final RoutingTable routingTable;
 
-    public RPCServer(RoutingTable routingTable, int port){
+    public RPCServer(RoutingTable routingTable){
         this.routingTable = routingTable;
         //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
@@ -39,12 +40,6 @@ public class RPCServer {
         requestListeners = new ArrayList<>();
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
-
-        try{
-            server = new DatagramSocket(port);
-        }catch(IOException e){
-            e.printStackTrace();
-        }
     }
 
     /*
@@ -198,13 +193,15 @@ public class RPCServer {
     }
     */
 
-    public int getPort(){
-        return server.getLocalPort();
-    }
-
-    public void start(){
+    public void start(int port)throws SocketException {
         //We add the packet to a pool so that we can read in a different thread so that we don't affect the RPC thread
         //without doing 2 threads we may clog up the RPC server and miss packets
+        if(server != null){
+            throw new IllegalArgumentException("Server has already started.");
+        }
+
+        server = new DatagramSocket(port);
+
         new Thread(new Runnable(){
             @Override
             public void run(){
@@ -243,6 +240,14 @@ public class RPCServer {
 
     public void stop(){
         server.close();
+    }
+
+    public boolean isRunning(){
+        return (server != null && !server.isClosed());
+    }
+
+    public int getPort(){
+        return (server != null) ? server.getLocalPort() : 0;
     }
 
     public void addRequestListener(RequestListener listener){
