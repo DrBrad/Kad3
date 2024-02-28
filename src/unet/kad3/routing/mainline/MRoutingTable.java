@@ -5,7 +5,9 @@ import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Random;
 
@@ -19,10 +21,16 @@ public class MRoutingTable extends RoutingTable {
     private InetAddress consensusExternalAddress;
 
     public MRoutingTable(){
+        try{
+            consensusExternalAddress = Inet4Address.getLocalHost();
+        }catch(UnknownHostException e){
+            e.printStackTrace();
+        }
+
+        deriveUID();
 
         buckets.add(new MBucket()); //CLOSEST
         buckets.add(new MBucket()); //FURTHEST
-
     }
 
     @Override

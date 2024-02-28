@@ -4,8 +4,11 @@ import unet.kad3.libs.CRC32C;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
+import unet.kad3.utils.net.AddressUtils;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.*;
 
 import static unet.kad3.utils.Node.*;
@@ -27,6 +30,13 @@ public class KRoutingTable extends RoutingTable {
         //use UPnP to attempt getting IP
         //If fails go to fall back method...
         //We need to somehow allow the refresh to derive our ID...
+        try{
+            consensusExternalAddress = Inet4Address.getLocalHost();
+        }catch(UnknownHostException e){
+            e.printStackTrace();
+        }
+
+        deriveUID();
 
         kBuckets = new KBucket[UID.ID_LENGTH];
         for(int i = 0; i < UID.ID_LENGTH; i++){
@@ -36,8 +46,9 @@ public class KRoutingTable extends RoutingTable {
 
     @Override
     public void updatePublicIPConsensus(InetAddress source, InetAddress addr){
-        //if(!AddressUtils.isGlobalUnicast(addr.getAddress()))
-        //    return;
+        if(!AddressUtils.isGlobalUnicast(addr)){
+            return;
+        }
 
         synchronized(originPairs){
             originPairs.put(source, addr);

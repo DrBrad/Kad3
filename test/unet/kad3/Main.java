@@ -9,6 +9,7 @@ import unet.kad3.routing.kb.KRoutingTable;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
+import java.net.Inet4Address;
 import java.net.InetAddress;
 
 public class Main {
@@ -44,7 +45,12 @@ public class Main {
         try{
             Kademlia k = new Kademlia("Kademlia", 8080);
             k.setDHT(KDHT.class);
-            System.out.println(k.getDHT().getUID());
+
+            UID uid = k.getDHT().getUID();
+            System.out.println(uid);
+
+            Node n = new Node(uid, Inet4Address.getLocalHost(), 8080);
+            System.out.println("Has secure ID: "+n.hasSecureID());
 
             /*
             k.getDHT().ping(new Node("", InetAddress.getByName("127.0.0.1"), 8080), new MessageCallback(){
