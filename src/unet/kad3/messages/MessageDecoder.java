@@ -42,7 +42,7 @@ public class MessageDecoder {
         BencodeObject ben = new BencodeObject(b);
 
         tid = ben.getBytes("t");
-        MessageBase.Type t = MessageBase.Type.valueOf(ben.getString("y"));
+        MessageBase.Type t = MessageBase.Type.valueOf("");//ben.getString("y"));
 
         //VERSION...
         //ben.getString("v");
