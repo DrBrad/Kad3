@@ -19,6 +19,10 @@ public class FindNodeRequest extends MessageBase {
         super(tid, Method.FIND_NODE, Type.REQ_MSG);
     }
 
+    public UID getTarget(){
+        return target;
+    }
+
     public void setTarget(UID target){
         this.target = target;
     }
