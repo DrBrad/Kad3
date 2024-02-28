@@ -40,7 +40,7 @@ public class MessageBase {
 
 
     public BencodeObject getBencode(){
-        BencodeObject ben = getBencode();
+        BencodeObject ben = new BencodeObject();
         ben.put("t", tid); //TRANSACTION ID
         ben.put("v", VERSION_CODE); //VERSION
 
@@ -49,11 +49,14 @@ public class MessageBase {
         switch(t){
             case REQ_MSG:
                 ben.put(t.getRPCTypeName(), m.getRPCName());
+                ben.put("a", new BencodeObject());
+                ben.getBencodeObject("a").put("id", uid.getBytes());
                 break;
 
             case RSP_MSG:
                 if(destinationIP != null){
                     ben.put("ip", AddressUtils.packAddress(publicIP, originPort)); //PACK MY IP ADDRESS
+                    ben.put("r", new BencodeObject());
                 }
                 break;
         }

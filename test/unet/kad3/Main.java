@@ -2,6 +2,7 @@ package unet.kad3;
 
 import unet.kad3.kad.Kademlia;
 import unet.kad3.kad.dht.KDHT;
+import unet.kad3.messages.MessageDecoder;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.inter.MessageCallback;
@@ -11,6 +12,8 @@ import unet.kad3.utils.UID;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
+
+import static unet.kad3.kad.RPCServer.TID_LENGTH;
 
 public class Main {
 
@@ -53,6 +56,16 @@ public class Main {
 
             Node n = new Node(uid, Inet4Address.getLocalHost(), 8080);
             System.out.println("Has secure ID: "+n.hasSecureID());
+
+
+            PingRequest r = new PingRequest(new byte[TID_LENGTH]);
+            r.setUID(uid);
+            System.out.println(r);
+
+            byte[] b = r.getBencode().encode();
+            MessageBase m = new MessageDecoder(b).parse();
+            System.out.println(m);
+
 
             /*
             k.getDHT().ping(new Node("", InetAddress.getByName("127.0.0.1"), 8080), new MessageCallback(){

@@ -65,54 +65,59 @@ public class MessageDecoder {
         return null;
     }
 
-    public MessageBase decodeRequest(BencodeObject ben){
-
+    private MessageBase decodeRequest(BencodeObject ben){
+        MessageBase message;
         MessageBase.Method m = MessageBase.Method.valueOf(ben.getString("q"));
 
         switch(m){
             case PING:
-
+                message = new PingRequest(tid);
                 break;
 
             case FIND_NODE:
+                message = new FindNodeRequest(tid);
+
+                ((FindNodeRequest) message).setTarget(new UID(ben.getBencodeObject("a").getBytes("target")));
+
+                //UNSURE IF THIS IS VALID OR ALLOWED
+                /*
+                if(ben.getBencodeObject("a").containsKey("wants")){
+                    ((FindNodeRequest) message).setWantIPv4(ben.getBencodeObject("a").getBencodeArray("wants").contains("n4"));
+                    ((FindNodeRequest) message).setWantIPv4(ben.getBencodeObject("a").getBencodeArray("wants").contains("n6"));
+                }
+                */
 
                 break;
 
             case UNKNOWN:
-
-                break;
-
             default:
                 return null; //UNKNOWN
         }
 
+        message.setUID(new UID(ben.getBencodeObject("a").getBytes("id")));
 
-
-        return null;
+        return message;
     }
 
-    public MessageBase decodeResponse(BencodeObject ben){
-        MessageBase msg = null;
+    private MessageBase decodeResponse(BencodeObject ben){
+        MessageBase message;
         MessageBase.Method m = MessageBase.Method.valueOf(ben.getString("q"));
 
         switch(m){
             case PING:
-                msg = new PingResponse(tid);
+                message = new PingResponse(tid);
 
             case FIND_NODE:
-
+                message = new FindNodeResponse(tid);
                 break;
 
             case UNKNOWN:
-
-                break;
-
             default:
                 return null; //UNKNOWN
         }
 
         //MAYBE DO THIS BETTER?
-        msg.setUID(new UID(ben.getBencodeObject("a").getBytes("id")));
+        message.setUID(new UID(ben.getBencodeObject("a").getBytes("id")));
 
 
 
@@ -121,6 +126,6 @@ public class MessageDecoder {
         //msg.setDestination();
         //msg.setOrigin();;
 
-        return msg;
+        return message;
     }
 }

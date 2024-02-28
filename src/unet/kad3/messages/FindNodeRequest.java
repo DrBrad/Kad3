@@ -9,16 +9,21 @@ public class FindNodeRequest extends MessageBase {
 
     //ABSTRACT_LOOKUP_REQUEST
     private UID target;
-    private boolean ipv4, ipv6;
+    //private boolean ipv4 = true, ipv6 = true;
 
     public FindNodeRequest(){
         super(null, Method.FIND_NODE, Type.REQ_MSG);
+    }
+
+    public FindNodeRequest(byte[] tid){
+        super(tid, Method.FIND_NODE, Type.REQ_MSG);
     }
 
     public void setTarget(UID target){
         this.target = target;
     }
 
+    /*
     public boolean wantsIPv4(){
         return ipv4;
     }
@@ -34,13 +39,15 @@ public class FindNodeRequest extends MessageBase {
     public void setWantIPv6(boolean ipv6){
         this.ipv6 = ipv6;
     }
+    */
 
     @Override
     public BencodeObject getBencode(){
+        //BencodeObject ben = super.getBencode();
         BencodeObject ben = super.getBencode();
-        ben.put("id", uid.getBytes());
-        ben.put("target", target.getBytes());
+        ben.getBencodeObject("a").put("target", target.getBytes());
 
+        /*
         if(ipv4 || ipv6){
             BencodeArray w = new BencodeArray();
 
@@ -52,8 +59,10 @@ public class FindNodeRequest extends MessageBase {
                 w.add("n6");
             }
 
-            ben.put("want", w);
+            ben.getBencodeObject("a").put("want", w);
         }
+        */
+
         return ben;
     }
 }
