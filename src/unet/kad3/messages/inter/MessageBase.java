@@ -162,12 +162,16 @@ public class MessageBase {
         SAMPLE_INFOHASHES,
         UNKNOWN;
 
+        public static Method fromRPCName(String key){
+            return Method.valueOf(key.toUpperCase());
+        }
+
         String getRPCName(){
             return name().toLowerCase();
         }
     }
 
-    public static enum Type {
+    public enum Type {
 
         REQ_MSG {
             @Override
@@ -205,6 +209,18 @@ public class MessageBase {
         String getRPCTypeName(){
             return name().toLowerCase();
             //return null;
+        }
+
+        public static Type fromRPCTypeName(String key){
+            key = key.toLowerCase();
+
+            for(Type t : Type.values()){
+                if(key.equals(t.getRPCTypeName())){
+                    return t;
+                }
+            }
+
+            throw new IllegalArgumentException("Inner key not found.");
         }
 
         public static final String TYPE_KEY = "y";

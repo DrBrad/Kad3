@@ -10,7 +10,7 @@ public class PingRequest extends MessageBase {
     }
 
     public PingRequest(byte[] tid){
-        super(tid, Method.FIND_NODE, Type.REQ_MSG);
+        super(tid, Method.PING, Type.REQ_MSG);
     }
 
     //DECODE...

@@ -42,7 +42,7 @@ public class MessageDecoder {
         BencodeObject ben = new BencodeObject(b);
 
         tid = ben.getBytes("t");
-        MessageBase.Type t = MessageBase.Type.valueOf("");//ben.getString("y"));
+        MessageBase.Type t = MessageBase.Type.fromRPCTypeName(ben.getString("y"));
 
         //VERSION...
         //ben.getString("v");
@@ -67,7 +67,8 @@ public class MessageDecoder {
 
     private MessageBase decodeRequest(BencodeObject ben){
         MessageBase message;
-        MessageBase.Method m = MessageBase.Method.valueOf(ben.getString("q"));
+        MessageBase.Method m = MessageBase.Method.fromRPCName(ben.getString("q"));
+        System.out.println(m.toString());
 
         switch(m){
             case PING:
@@ -95,6 +96,7 @@ public class MessageDecoder {
         }
 
         message.setUID(new UID(ben.getBencodeObject("a").getBytes("id")));
+        //message.setVersion(ben.getDouble("v"));
 
         return message;
     }
@@ -118,6 +120,7 @@ public class MessageDecoder {
 
         //MAYBE DO THIS BETTER?
         message.setUID(new UID(ben.getBencodeObject("a").getBytes("id")));
+        //message.setVersion(ben.getDouble("v"));
 
 
 
