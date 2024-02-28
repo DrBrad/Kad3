@@ -49,8 +49,7 @@ public class MessageBase {
             case RSP_MSG:
                 ben.put("r", new BencodeObject());
                 if(destinationIP != null){
-                    //DOES THIS GO INTO R????
-                    ben.getBencodeObject("r").put("ip", AddressUtils.packAddress(publicIP, originPort)); //PACK MY IP ADDRESS
+                    ben.put("ip", AddressUtils.packAddress(publicIP, originPort)); //PACK MY IP ADDRESS
                 }
                 ben.getBencodeObject("r").put("id", uid.getBytes());
                 break;
