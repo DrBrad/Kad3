@@ -55,6 +55,8 @@ public class Main {
             });
             */
 
+            k.stop();
+
         }catch(Exception e){
             e.printStackTrace();
         }

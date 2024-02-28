@@ -68,5 +68,8 @@ public class Kademlia {
 
     public void stop(){
         server.stop();
+        if(dht != null){
+            dht.stop();
+        }
     }
 }

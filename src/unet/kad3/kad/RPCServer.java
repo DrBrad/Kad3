@@ -212,7 +212,10 @@ public class RPCServer {
                     try{
                         DatagramPacket packet = new DatagramPacket(new byte[65535], 65535);
                         server.receive(packet);
-                        receivePool.offer(packet);
+
+                        if(packet != null){
+                            receivePool.offer(packet);
+                        }
                     }catch(IOException e){
                         e.printStackTrace();
                     }
