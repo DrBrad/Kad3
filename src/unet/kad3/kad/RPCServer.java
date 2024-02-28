@@ -1,7 +1,6 @@
 package unet.kad3.kad;
 
 import unet.kad3.kad.calls.RPCRequestCall;
-import unet.kad3.kad.calls.RPCResponseCall;
 import unet.kad3.kad.calls.inter.RPCCall;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;

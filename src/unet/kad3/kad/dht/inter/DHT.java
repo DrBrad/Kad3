@@ -9,9 +9,11 @@ import unet.kad3.messages.PingRequest;
 import unet.kad3.messages.PingResponse;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.inter.MessageCallback;
+import unet.kad3.routing.kb.KBucket;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
+import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -47,6 +49,32 @@ public class DHT implements RPCServer.RequestListener {
             refreshTimerTask = new TimerTask(){
                 @Override
                 public void run(){
+                    for(int i = 1; i < UID.ID_LENGTH; i++){
+                        if(server.getRoutingTable().getBucketSize(i) < KBucket.MAX_BUCKET_SIZE){ //IF THE BUCKET IS FULL WHY SEARCH... WE CAN REFILL BY OTHER PEER PINGS AND LOOKUPS...
+                            final UID k = server.getRoutingTable().getDerivedUID().generateNodeIdByDistance(i);
+
+                            final List<Node> closest = server.getRoutingTable().findClosest(k, KBucket.MAX_BUCKET_SIZE);
+                            if(!closest.isEmpty()){
+                                for(Node n : closest){
+                                    findNode(n, new MessageCallback(){
+                                        @Override
+                                        public void onResponse(MessageBase request, MessageBase response){
+                                            System.out.println(response.toString());
+                                        }
+                                    }, k);
+                                }
+                                //findNode(closest, k);
+                                /*
+                                exe.submit(new Runnable(){
+                                    @Override
+                                    public void run(){
+                                        //new NodeLookupMessage(routingTable, closest, k).execute();
+                                    }
+                                });
+                                */
+                            }
+                        }
+                    }
 
                     /*
                     for(int i = 1; i < KID.ID_LENGTH; i++){
@@ -183,9 +211,10 @@ public class DHT implements RPCServer.RequestListener {
         //request.getServer().sendMessage(response);
     }
 
-    public void findNode(Node node, MessageCallback callback){
+    public void findNode(Node node, MessageCallback callback, UID target){
         FindNodeRequest request = new FindNodeRequest();
         request.setDestination(node.getAddress(), node.getPort());
+        request.setTarget(target);
         sendMessage(request, callback);
     }
 

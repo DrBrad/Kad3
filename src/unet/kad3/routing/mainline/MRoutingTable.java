@@ -9,6 +9,7 @@ import java.net.Inet4Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Random;
 
 import static unet.kad3.utils.Node.*;
@@ -17,7 +18,7 @@ public class MRoutingTable extends RoutingTable {
 
     //TODO
 
-    private ArrayList<MBucket> buckets = new ArrayList<>();
+    private ArrayList<MBucket> mBuckets = new ArrayList<>();
     private InetAddress consensusExternalAddress;
 
     public MRoutingTable(){
@@ -29,8 +30,8 @@ public class MRoutingTable extends RoutingTable {
 
         deriveUID();
 
-        buckets.add(new MBucket()); //CLOSEST
-        buckets.add(new MBucket()); //FURTHEST
+        mBuckets.add(new MBucket()); //CLOSEST
+        mBuckets.add(new MBucket()); //FURTHEST
     }
 
     @Override
@@ -83,33 +84,33 @@ public class MRoutingTable extends RoutingTable {
 
                 //ARE WE EVEN CHECKING FOR IP/PORT MATCHES...
 
-                if(b < buckets.size()){
-                    if(!buckets.get(b).isFull()){
-                        buckets.get(b).insert(n);
+                if(b < mBuckets.size()){
+                    if(!mBuckets.get(b).isFull()){
+                        mBuckets.get(b).insert(n);
                     }//ELSE...???? - I GUESS THIS IS FINE BECAUSE THIS SHOULD ALREADY BE FULL AFTER SPLIT...
 
                 }else{
 
                     //LOOK INTO THIS....
                     //NOT SURE IF THIS IS DONE VERY WELL...
-                    if(buckets.get(buckets.size()-1).isFull()){
-                        buckets.add(buckets.size(), new MBucket());
+                    if(mBuckets.get(mBuckets.size()-1).isFull()){
+                        mBuckets.add(mBuckets.size(), new MBucket());
 
                         //SPLIT TIME
-                        for(int i = buckets.get(buckets.size()-2).size()-1; i > -1; i--){
+                        for(int i = mBuckets.get(mBuckets.size()-2).size()-1; i > -1; i--){
                             //for(Node ns : buckets.get(buckets.size()-2).list()){
-                            Node ns = buckets.get(buckets.size()-2).get(i);
+                            Node ns = mBuckets.get(mBuckets.size()-2).get(i);
                             int j = getBucketUID(ns.getUID());
-                            if(j == buckets.size()-1){
-                                buckets.get(buckets.size()-2).remove(ns);
-                                buckets.get(buckets.size()-1).insert(ns);
+                            if(j == mBuckets.size()-1){
+                                mBuckets.get(mBuckets.size()-2).remove(ns);
+                                mBuckets.get(mBuckets.size()-1).insert(ns);
                             }
                         }
-                        System.out.println("SPLIT ("+(buckets.size()-2)+" - "+(buckets.size()-1)+")");
+                        System.out.println("SPLIT ("+(mBuckets.size()-2)+" - "+(mBuckets.size()-1)+")");
                     }
 
-                    if(!buckets.get(buckets.size()-1).isFull()){
-                        buckets.get(buckets.size()-1).insert(n);
+                    if(!mBuckets.get(mBuckets.size()-1).isFull()){
+                        mBuckets.get(mBuckets.size()-1).insert(n);
                     }
 
                 }
@@ -138,4 +139,15 @@ public class MRoutingTable extends RoutingTable {
         return bid < 0 ? 0 : bid;
     }
     */
+
+
+    @Override
+    public synchronized List<Node> findClosest(UID k, int r){
+        return null;
+    }
+
+    @Override
+    public synchronized int getBucketSize(int i){
+        return mBuckets.get(i).size();
+    }
 }

@@ -9,9 +9,11 @@ public class PingRequest extends MessageBase {
         super(null, Method.PING, Type.REQ_MSG);
     }
 
+    //DECODE...
+
     @Override
     public BencodeObject getBencode(){
-        BencodeObject ben = new BencodeObject();
+        BencodeObject ben = super.getBencode();
         ben.put("id", uid.getBytes());
         return ben;
     }

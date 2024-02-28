@@ -209,6 +209,6 @@ public class MessageBase {
 
     @Override
     public String toString(){
-        return null;
+        return getBencode().toString();
     }
 }

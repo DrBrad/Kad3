@@ -4,6 +4,7 @@ import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
 import java.net.InetAddress;
+import java.util.List;
 
 public abstract class RoutingTable {
 
@@ -33,5 +34,8 @@ public abstract class RoutingTable {
 
     public abstract int getBucketUID(UID k);
 
+    public abstract List<Node> findClosest(UID k, int r);
+
+    public abstract int getBucketSize(int i);
 
 }

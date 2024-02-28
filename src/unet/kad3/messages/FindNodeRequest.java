@@ -1,12 +1,59 @@
 package unet.kad3.messages;
 
+import unet.kad3.libs.bencode.variables.BencodeArray;
+import unet.kad3.libs.bencode.variables.BencodeObject;
 import unet.kad3.messages.inter.MessageBase;
+import unet.kad3.utils.UID;
 
 public class FindNodeRequest extends MessageBase {
 
     //ABSTRACT_LOOKUP_REQUEST
+    private UID target;
+    private boolean ipv4, ipv6;
 
     public FindNodeRequest(){
-        super(null, Method.FIND_NODE, Type.RSP_MSG);
+        super(null, Method.FIND_NODE, Type.REQ_MSG);
+    }
+
+    public void setTarget(UID target){
+        this.target = target;
+    }
+
+    public boolean wantsIPv4(){
+        return ipv4;
+    }
+
+    public void setWantIPv4(boolean ipv4){
+        this.ipv4 = ipv4;
+    }
+
+    public boolean wantsIPv6(){
+        return ipv6;
+    }
+
+    public void setWantIPv6(boolean ipv6){
+        this.ipv6 = ipv6;
+    }
+
+    @Override
+    public BencodeObject getBencode(){
+        BencodeObject ben = super.getBencode();
+        ben.put("id", uid.getBytes());
+        ben.put("target", target.getBytes());
+
+        if(ipv4 || ipv6){
+            BencodeArray w = new BencodeArray();
+
+            if(ipv4){
+                w.add("n4");
+            }
+
+            if(ipv6){
+                w.add("n6");
+            }
+
+            ben.put("want", w);
+        }
+        return ben;
     }
 }

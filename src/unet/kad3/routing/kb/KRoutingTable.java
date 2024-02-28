@@ -2,6 +2,7 @@ package unet.kad3.routing.kb;
 
 import unet.kad3.libs.CRC32C;
 import unet.kad3.routing.inter.RoutingTable;
+import unet.kad3.utils.KComparator;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 import unet.kad3.utils.net.AddressUtils;
@@ -256,21 +257,24 @@ public class KRoutingTable extends RoutingTable {
         int bid = local.getUID().getDistance(k)-1;
         return bid < 0 ? 0 : bid;
     }
+*/
 
-    public synchronized List<Contact> getAllNodes(){
-        ArrayList<Contact> nodes = new ArrayList<>();
+    public synchronized List<Node> getAllNodes(){
+        List<Node> nodes = new ArrayList<>();
         for(KBucket kBucket : kBuckets){
-            nodes.addAll(kBucket.getContacts());
+            nodes.addAll(kBucket.getAllNodes());
         }
         return nodes;
     }
 
+    /*
     public synchronized List<Contact> findClosest(){
         return null;
     }
-*/
-    /*
-        public synchronized List<Node> findClosest(UID k, int r){
+    */
+
+    @Override
+    public synchronized List<Node> findClosest(UID k, int r){
         TreeSet<Node> sortedSet = new TreeSet<>(new KComparator(k));
         sortedSet.addAll(getAllNodes());
 
@@ -286,6 +290,7 @@ public class KRoutingTable extends RoutingTable {
         return closest;
     }
 
+    /*
     public synchronized List<Node> findClosestWithLocal(UID k, int r){
         TreeSet<Node> sortedSet = new TreeSet<>(new KComparator(k));
         sortedSet.addAll(getAllNodes());
@@ -302,11 +307,13 @@ public class KRoutingTable extends RoutingTable {
         }
         return closest;
     }
+    */
 
     public synchronized int getBucketSize(int i){
-        return kbuckets[i].size();
+        return kBuckets[i].size();
     }
 
+    /*
     public synchronized int getBucketId(UID k){
         int bid = local.getNode().getUID().getDistance(k)-1;
         return bid < 0 ? 0 : bid;
