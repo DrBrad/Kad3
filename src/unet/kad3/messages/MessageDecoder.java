@@ -68,7 +68,6 @@ public class MessageDecoder {
     private MessageBase decodeRequest(BencodeObject ben){
         MessageBase message;
         MessageBase.Method m = MessageBase.Method.fromRPCName(ben.getString("q"));
-        System.out.println(m.toString());
 
         switch(m){
             case PING:
@@ -108,6 +107,7 @@ public class MessageDecoder {
         switch(m){
             case PING:
                 message = new PingResponse(tid);
+                break;
 
             case FIND_NODE:
                 message = new FindNodeResponse(tid);

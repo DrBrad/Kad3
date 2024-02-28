@@ -6,22 +6,27 @@ import java.util.BitSet;
 
 public class UID {
 
-    public static final int ID_LENGTH = 160;
+    public static final int ID_LENGTH = 20; //160
     protected byte[] bid;
 
-    public UID(String s){
-        int len = s.length();
-        if(s.length()/2 != ID_LENGTH){
-            throw new IllegalArgumentException("Node ID is not correct length");
+    public UID(String key){
+        int len = key.length();
+        if(key.length() != ID_LENGTH*2){
+            System.out.println();
+            throw new IllegalArgumentException("Node ID is not correct length, given string is "+key.length()+" chars, required "+ID_LENGTH+" chars");
         }
 
         bid = new byte[ID_LENGTH];
         for(int i = 0; i < len; i += 2){
-            bid[i/2] = (byte) ((Character.digit(s.charAt(i), 16) << 4)+Character.digit(s.charAt(i+1), 16));
+            bid[i/2] = (byte) ((Character.digit(key.charAt(i), 16) << 4)+Character.digit(key.charAt(i+1), 16));
         }
     }
 
     public UID(byte[] bid){
+        if(bid.length != ID_LENGTH){
+            throw new IllegalArgumentException("Key must be "+ID_LENGTH+" bytes");
+        }
+
         this.bid = bid;
     }
 

@@ -57,25 +57,6 @@ public class Main {
             Node n = new Node(uid, Inet4Address.getLocalHost(), 8080);
             System.out.println("Has secure ID: "+n.hasSecureID());
 
-
-            PingRequest r = new PingRequest(new byte[TID_LENGTH]);
-            r.setUID(uid);
-            System.out.println(r);
-
-            byte[] b = r.getBencode().encode();
-            MessageBase m = new MessageDecoder(b).parse();
-            System.out.println(m);
-
-
-            /*
-            k.getDHT().ping(new Node("", InetAddress.getByName("127.0.0.1"), 8080), new MessageCallback(){
-                @Override
-                public void onResponse(MessageBase request, MessageBase response){
-
-                }
-            });
-            */
-
             k.stop();
 
         }catch(Exception e){
