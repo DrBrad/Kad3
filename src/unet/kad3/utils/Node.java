@@ -65,6 +65,10 @@ public class Node {
         this(new UID(uid), address, port);
     }
 
+    public Node(byte[] bid, InetAddress address, int port){
+        this(new UID(bid), address, port);
+    }
+
     public Node(UID uid, InetAddress address, int port){
         this.uid = uid;
         this.address = address;
