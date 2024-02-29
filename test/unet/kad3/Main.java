@@ -1,10 +1,7 @@
 package unet.kad3;
 
 import unet.kad3.kad.Kademlia;
-import unet.kad3.utils.Node;
-import unet.kad3.utils.UID;
 
-import java.net.Inet4Address;
 import java.net.InetAddress;
 
 public class Main {
