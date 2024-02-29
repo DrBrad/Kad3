@@ -38,9 +38,9 @@ public class UID {
 
     //COMPARE MATCHES
     public UID xor(UID k){
-        byte[] distance = new byte[ID_LENGTH/8];
+        byte[] distance = new byte[ID_LENGTH];
 
-        for(int i = 0; i < ID_LENGTH/8; i++){
+        for(int i = 0; i < ID_LENGTH; i++){
             distance[i] = (byte) (bid[i]^k.getBytes()[i]);
         }
         return new UID(distance);
@@ -70,9 +70,9 @@ public class UID {
     }
 
     public UID generateNodeIdByDistance(int distance){
-        byte[] result = new byte[ID_LENGTH/8];
+        byte[] result = new byte[ID_LENGTH];
 
-        int numByteZeroes = (ID_LENGTH-distance)/8;
+        int numByteZeroes = ((ID_LENGTH*8)-distance)/8;
         int numBitZeroes = 8-(distance%8);
 
         for(int i = 0; i < numByteZeroes; i++){
