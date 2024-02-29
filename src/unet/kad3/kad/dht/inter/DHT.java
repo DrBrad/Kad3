@@ -160,7 +160,7 @@ public class DHT implements RPCServer.RequestListener {
 
         PingResponse response = new PingResponse(request.getTransactionID());
         response.setDestination(request.getOrigin());
-        //response.setPublic(request.getOrigin());
+        response.setPublic(request.getOrigin());
         response.setTransactionID(request.getTransactionID());
 
         RPCResponseCall call = new RPCResponseCall(response);
@@ -170,49 +170,29 @@ public class DHT implements RPCServer.RequestListener {
     public void ping(Node node, MessageCallback callback){
         PingRequest request = new PingRequest();
         request.setDestination(node.getAddress());
-        sendMessage(request, callback);
+
+        RPCRequestCall call = new RPCRequestCall(request);
+        call.setMessageCallback(callback);
+        server.sendMessage(call);
     }
 
     private void findNode(FindNodeRequest request){
-        /*
-        if (!isRunning()) {
-            return;
-        }
-
-        // ignore requests we get from ourself
-        if (node.isLocalId(r.getID())) {
-            return;
-        }
-
-        AbstractLookupResponse response;
-        if(r instanceof FindNodeRequest)
-            response = new FindNodeResponse(r.getMTID());
-        else
-            response = new UnknownTypeResponse(r.getMTID());
-
-        populateResponse(r.getTarget(), response, r.doesWant4() ? DHTConstants.MAX_ENTRIES_PER_BUCKET : 0, r.doesWant6() ? DHTConstants.MAX_ENTRIES_PER_BUCKET : 0);
-
-        response.setDestination(r.getOrigin());
-        r.getServer().sendMessage(response);
-
-        node.recieved(r);
-        */
-
         FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
         response.setDestination(request.getOrigin());
+        response.setPublic(request.getOrigin());
         response.setTransactionID(request.getTransactionID());
-        //request.getServer().sendMessage(response);
+        response.addNodes(server.getRoutingTable().findClosest(request.getTarget(), KBucket.MAX_BUCKET_SIZE));
+
+        RPCResponseCall call = new RPCResponseCall(response);
+        server.sendMessage(call);
     }
 
     public void findNode(Node node, MessageCallback callback, UID target){
         FindNodeRequest request = new FindNodeRequest();
         request.setDestination(node.getAddress());
         request.setTarget(target);
-        sendMessage(request, callback);
-    }
 
-    private void sendMessage(MessageBase message, MessageCallback callback){
-        RPCRequestCall call = new RPCRequestCall(message);
+        RPCRequestCall call = new RPCRequestCall(request);
         call.setMessageCallback(callback);
         server.sendMessage(call);
     }
