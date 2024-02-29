@@ -92,20 +92,18 @@ public class MessageDecoder {
                 ((FindNodeResponse) message).decode(ben.getBencodeObject("r"));
                 break;
 
+            case GET:
+
+            case PUT:
+
             case UNKNOWN:
             default:
                 return null; //UNKNOWN
         }
 
-        //MAYBE DO THIS BETTER?
         message.setUID(new UID(ben.getBencodeObject("r").getBytes("id")));
         message.setPublic(AddressUtils.unpackAddress(ben.getBytes("ip")));
         //message.setVersion(ben.getDouble("v"));
-
-
-        //msg.setUID();
-        //msg.setDestination();
-        //msg.setOrigin();;
 
         return message;
     }

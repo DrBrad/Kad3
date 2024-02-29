@@ -17,11 +17,7 @@ public class MessageBase {
 
     protected byte[] tid;
 
-    //protected InetAddress destinationIP, originIP, publicIP; //LOTS OF QUESTIONS WITH THIS...
     protected InetSocketAddress destination, origin, publicAddress;
-    //protected int destinationPort, originPort;
-
-
 
     //TRANSACTION ID
     //VERSION... "DONT HARD CODE THIS SHIT..."
@@ -68,7 +64,6 @@ public class MessageBase {
     public UID getUID(){
         return uid;
     }
-
 
     public void setTransactionID(byte[] tid){
         this.tid = tid;
@@ -137,51 +132,6 @@ public class MessageBase {
     public void setOrigin(InetSocketAddress origin){
         this.origin = origin;
     }
-    /*
-    public void setDestination(InetAddress address, int port){
-        destination = new InetSocketAddress(address, port);
-    }
-
-    public void setDestination(InetSocketAddress destination){
-        this.destination = destination;
-    }
-    /*
-    public void setDestination(InetAddress address, int port){
-        this.destinationIP = address;
-        this.destinationPort = port;
-    }
-
-    public InetAddress getDestinationIP(){
-        return destinationIP;
-    }
-
-    public int getDestinationPort(){
-        return destinationPort;
-    }
-
-
-
-    public void setOrigin(InetAddress address, int port){
-        this.publicIP = address;
-        this.originPort = port;
-    }
-
-    public InetAddress getOriginIP(){
-        return originIP;
-    }
-
-    public int getOriginPort(){
-        return originPort;
-    }
-
-    public void setPublicIP(InetAddress address){
-        this.publicIP = address;
-    }
-
-    public InetAddress getPublicIP(){
-        return publicIP;
-    }
-    */
 
     public Method getMethod(){
         return m;
