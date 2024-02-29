@@ -174,6 +174,6 @@ public class Node {
 
     @Override
     public String toString(){
-        return "{ \033[0;34mUID\033[0m: \033[0;35m"+uid.toString()+"\033[0m, \033[0;34mADDRESS\033[0m: \033[0;35m"+address.getAddress().getHostAddress()+"\033[0m, \033[0;34mPORT\033[0m: \033[0;35m"+address.getPort()+"\033[0m }";
+        return "{ \033[0;34mUID\033[0m: \033[0;35m"+uid.toString()+"\033[0m, \033[0;34mADDRESS\033[0m: \033[0;35m"+address.getAddress().getHostAddress()+"\033[0m, \033[0;34mPORT\033[0m: \033[0;35m"+address.getPort()+"\033[0m, \033[0;34mSECURE\033[0m: \033[0;35m"+hasSecureID()+"\033[0m }";
     }
 }
