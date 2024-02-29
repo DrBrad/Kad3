@@ -1,6 +1,5 @@
 package unet.kad3.messages;
 
-import unet.kad3.libs.bencode.variables.BencodeArray;
 import unet.kad3.libs.bencode.variables.BencodeObject;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.utils.Node;
@@ -14,6 +13,10 @@ import java.util.List;
 import static unet.kad3.utils.UID.ID_LENGTH;
 
 public class FindNodeResponse extends MessageBase {
+
+    /*
+    * THIS CLASS COULD BE MADE MUCH BETTER BUT IT WORKS FOR NOW...
+    * */
 
     public static final int IPV4_LENGTH = 4, IPV6_LENGTH = 16, NODE_CAP = 20;
     private List<Node> ipv4Nodes, ipv6Nodes;
@@ -164,7 +167,6 @@ public class FindNodeResponse extends MessageBase {
     public BencodeObject getBencode(){
         BencodeObject ben = super.getBencode();
 
-        //CAN WE JUST USE A FUNCTION TO CALL THIS CODE 1 TIME FOR BOTH ARRAYS...
         if(!ipv4Nodes.isEmpty()){
             ben.getBencodeObject("r").put("nodes", encodeNodes(Types.IPv4));
         }
