@@ -42,13 +42,13 @@ public class Main {
             k.bind(8080);
             //k.join();
 
-            UID uid = k.getDHT().getUID();
-            System.out.println(uid);
+            //UID uid = k.getDHT().getUID();
+            //System.out.println(uid);
 
-            Node n = new Node(uid, Inet4Address.getLocalHost(), 8080);
-            System.out.println("Has secure ID: "+n.hasSecureID());
+            //Node n = new Node(uid, Inet4Address.getLocalHost(), 8080);
+            //System.out.println("Has secure ID: "+n.hasSecureID());
 
-            k.stop();
+            //k.stop();
 
         }catch(Exception e){
             e.printStackTrace();
