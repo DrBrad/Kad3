@@ -21,7 +21,7 @@ import java.util.TimerTask;
 public class DHT implements RPCServer.RequestListener {
 
     //public static final int THREAD_POOL_SIZE = 3;
-    public static final long BUCKET_REFRESH_TIME = 3600000;
+    public static final long BUCKET_REFRESH_TIME = 30000;//3600000;
 
     private Timer refreshTimer;
     private TimerTask refreshTimerTask;
@@ -40,7 +40,7 @@ public class DHT implements RPCServer.RequestListener {
         findNode(address, new MessageCallback(){
             @Override
             public void onResponse(MessageBase request, MessageBase response){
-                System.out.println(response.getBencode());
+                //System.out.println(response.getBencode());
                 FindNodeResponse r = (FindNodeResponse) response;
 
                 for(Node n : r.getAllNodes()){
@@ -48,7 +48,7 @@ public class DHT implements RPCServer.RequestListener {
                     System.out.println(n);
                 }
 
-                //startRefresh();
+                startRefresh();
             }
         }, server.getRoutingTable().getDerivedUID());
 
@@ -65,6 +65,7 @@ public class DHT implements RPCServer.RequestListener {
             refreshTimerTask = new TimerTask(){
                 @Override
                 public void run(){
+                    System.out.println("STARTING REFRESH");
                     for(int i = 1; i < UID.ID_LENGTH; i++){
                         if(server.getRoutingTable().getBucketSize(i) < KBucket.MAX_BUCKET_SIZE){ //IF THE BUCKET IS FULL WHY SEARCH... WE CAN REFILL BY OTHER PEER PINGS AND LOOKUPS...
                             final UID k = server.getRoutingTable().getDerivedUID().generateNodeIdByDistance(i);
@@ -75,7 +76,14 @@ public class DHT implements RPCServer.RequestListener {
                                     findNode(n.getAddress(), new MessageCallback(){
                                         @Override
                                         public void onResponse(MessageBase request, MessageBase response){
-                                            System.out.println(response.toString());
+                                            //System.out.println(response.toString());
+
+                                            FindNodeResponse r = (FindNodeResponse) response;
+
+                                            for(Node n : r.getAllNodes()){
+                                                server.getRoutingTable().insert(n);
+                                                System.out.println(n);
+                                            }
                                         }
                                     }, k);
                                 }
@@ -146,6 +154,7 @@ public class DHT implements RPCServer.RequestListener {
     }
 
     public UID getUID(){
+        System.out.println(server.getRoutingTable().getConsensusExternalAddress());
         return server.getRoutingTable().getDerivedUID();
     }
 

@@ -53,6 +53,7 @@ public class KRoutingTable extends RoutingTable {
 
         synchronized(originPairs){
             originPairs.put(source, addr);
+            System.err.println("CONSENSUS UPDATE: "+originPairs.size());
             if(originPairs.size() > 20 && !addr.equals(consensusExternalAddress)){
                 List<InetAddress> k = new ArrayList<>(originPairs.values());
                 short res = 0, count = 1;

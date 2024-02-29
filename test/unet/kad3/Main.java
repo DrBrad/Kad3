@@ -33,12 +33,20 @@ public class Main {
 
     //WOULD IT BE BETTER TO NOT USE POOLS BUT JUST TAKE EACH PACKET AND SEND IT TO A NEW THREAD...?
 
+    //START COUNTING MESSAGES RECEIVED SO THAT WE CAN DETERMINE IF WE ARE FAILING WITH ROUTING TABLE CONSENSUS IP
+    //THE IP TAKES LIKE 10 REFRESHES TO GET IP - LIKELY THE ASYNC RESPONSE IS THROWING THIS UPDATE OFF
+
     public static void main(String[] args){
         try{
             Kademlia k = new Kademlia("Kademlia");
             //k.setDHT(KDHT.class);
             //k.bind(8080);
             k.join(6881, InetAddress.getByName("router.bittorrent.com"), 6881);
+
+            while(true){
+                Thread.sleep(10000);
+                System.out.println(k.getDHT().getUID());
+            }
 
             //UID uid = k.getDHT().getUID();
             //System.out.println(uid);
