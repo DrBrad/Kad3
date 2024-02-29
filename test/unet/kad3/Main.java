@@ -37,12 +37,9 @@ public class Main {
 
     public static void main(String[] args){
         try{
-            UID uid = new UID("a5d43220bc8f112a3d426c84764f8c2a1150e616").generateNodeIdByDistance(2);
-            System.out.println(uid);
-
-            //Kademlia k = new Kademlia("Kademlia");
+            Kademlia k = new Kademlia("Kademlia");
             //k.setDHT(KDHT.class);
-            //k.bind(8080);
+            k.bind(8080);
             //k.join();
 
             //UID uid = k.getDHT().getUID();

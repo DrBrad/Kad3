@@ -63,15 +63,6 @@ public class DHT implements RPCServer.RequestListener {
                                         }
                                     }, k);
                                 }
-                                //findNode(closest, k);
-                                /*
-                                exe.submit(new Runnable(){
-                                    @Override
-                                    public void run(){
-                                        //new NodeLookupMessage(routingTable, closest, k).execute();
-                                    }
-                                });
-                                */
                             }
                         }
                     }
