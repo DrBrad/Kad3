@@ -21,24 +21,40 @@ public class FindNodeResponse extends MessageBase {
     public FindNodeResponse(byte[] tid){
         super(tid, Method.FIND_NODE, Type.RSP_MSG);
         ipv4Nodes = new ArrayList<>();
+        ipv6Nodes = new ArrayList<>();
     }
 
     protected void decode(BencodeObject ben){
         if(ben.containsKey("nodes")){
             byte[] buf = ben.getBencodeObject("r").getBytes("nodes");
-            addNodes(buf, IPV4_LENGTH);
+            addNodes(buf, Types.IPv4);
         }
 
         if(ben.containsKey("nodes6")){
             byte[] buf = ben.getBencodeObject("r").getBytes("nodes6");
-            addNodes(buf, IPV6_LENGTH);
+            addNodes(buf, Types.IPv6);
         }
     }
 
     //BASE FOR IPv4 vs IPv6
-    private void addNodes(byte[] buf, int addressLength){
+    private void addNodes(byte[] buf, Types type){
+        List<Node> nodes;
+
+        switch(type){
+            case IPv4:
+                nodes = ipv4Nodes;
+                break;
+
+            case IPv6:
+                nodes = ipv6Nodes;
+                break;
+
+            default:
+                return;
+        }
+
         byte[] bid = new byte[ID_LENGTH];
-        byte[] addr = new byte[addressLength];
+        byte[] addr = new byte[type.getAddressLength()];
         int position = 0;
         int port;
 
@@ -49,15 +65,53 @@ public class FindNodeResponse extends MessageBase {
             System.arraycopy(buf, position, addr, 0, addr.length);
             position += addr.length;
 
-            port = ((buf[position] & 0xff) << 8) | (buf[position + 1] & 0xff);
+            port = ((buf[position] & 0xff) << 8) | (buf[position+1] & 0xff);
             position += 2;
 
             try{
                 nodes.add(new Node(bid, InetAddress.getByAddress(addr), port));
+
             }catch(UnknownHostException e){
                 e.printStackTrace();
             }
         }
+    }
+
+    private byte[] encodeNodes(Types type){
+        List<Node> nodes;
+
+        switch(type){
+            case IPv4:
+                nodes = ipv4Nodes;
+                break;
+
+            case IPv6:
+                nodes = ipv6Nodes;
+                break;
+
+            default:
+                return null;
+        }
+
+        byte[] buf = new byte[nodes.size()*ID_LENGTH*IPV6_LENGTH*2];
+        int position = 0;
+
+        for(Node n : nodes){
+            byte[] bid = n.getUID().getBytes();
+            System.arraycopy(bid, 0, buf, position, bid.length);
+            position += bid.length;
+
+            byte[] addr = n.getAddress().getAddress();
+            System.arraycopy(addr, 0, buf, position, addr.length);
+            position += addr.length;
+
+            //PORT TIME...
+            buf[position] = (byte) ((n.getPort() >> 8) & 0xff);
+            buf[position+1] = (byte) (n.getPort() & 0xff);
+            position += 2;
+        }
+
+        return buf;
     }
 
     public void addNode(Node node){
@@ -112,49 +166,31 @@ public class FindNodeResponse extends MessageBase {
 
         //CAN WE JUST USE A FUNCTION TO CALL THIS CODE 1 TIME FOR BOTH ARRAYS...
         if(!ipv4Nodes.isEmpty()){
-            byte[] a = new byte[ipv4Nodes.size()*ID_LENGTH*IPV4_LENGTH*2];
-            int position = 0;
-
-            for(Node n : ipv4Nodes){
-                byte[] bid = n.getUID().getBytes();
-                System.arraycopy(bid, 0, a, position, bid.length);
-                position += bid.length;
-
-                byte[] addr = n.getAddress().getAddress();
-                System.arraycopy(addr, 0, a, position, addr.length);
-                position += addr.length;
-
-                //PORT TIME...
-                a[position] = (byte) ((n.getPort() >> 8) & 0xff);
-                a[position+1] = (byte) (n.getPort() & 0xff);
-                position += 2;
-            }
-
-            ben.getBencodeObject("r").put("nodes", a);
+            ben.getBencodeObject("r").put("nodes", encodeNodes(Types.IPv4));
         }
 
         if(!ipv6Nodes.isEmpty()){
-            byte[] a = new byte[ipv6Nodes.size()*ID_LENGTH*IPV6_LENGTH*2];
-            int position = 0;
-
-            for(Node n : ipv6Nodes){
-                byte[] bid = n.getUID().getBytes();
-                System.arraycopy(bid, 0, a, position, bid.length);
-                position += bid.length;
-
-                byte[] addr = n.getAddress().getAddress();
-                System.arraycopy(addr, 0, a, position, addr.length);
-                position += addr.length;
-
-                //PORT TIME...
-                a[position] = (byte) ((n.getPort() >> 8) & 0xff);
-                a[position+1] = (byte) (n.getPort() & 0xff);
-                position += 2;
-            }
-
-            ben.getBencodeObject("r").put("nodes6", a);
+            ben.getBencodeObject("r").put("nodes6", encodeNodes(Types.IPv6));
         }
 
         return ben;
+    }
+
+    public enum Types {
+
+        IPv4 {
+            int getAddressLength(){
+                return IPV4_LENGTH;
+            }
+        },
+        IPv6 {
+            int getAddressLength(){
+                return IPV6_LENGTH;
+            }
+        };
+
+        int getAddressLength(){
+            return 0;
+        }
     }
 }
