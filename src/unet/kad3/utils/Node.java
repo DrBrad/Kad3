@@ -21,15 +21,15 @@ public class Node {
     private long lastSeen;
 
     //FOR TESTING PURPOSES ONLY...
+
     /*
-    public Node(InetAddress address, int port){
+    public Node(InetSocketAddress address){
         this.address = address;
-        this.port = port;
 
         //THIS WILL LIKELY BE MOVED STRAIT THE FUCK TO THE ROUTING TABLE AS WE DON'T MAKE ID's FOR OTHERS...
 
         //DERIVE THE KEY...
-        byte[] ip = address.getAddress();
+        byte[] ip = address.getAddress().getAddress();
         byte[] mask = ip.length == 4 ? V4_MASK : V6_MASK;
 
         for(int i = 0; i < ip.length; i++){
