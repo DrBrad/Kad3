@@ -304,16 +304,16 @@ public class RPCServer {
     //PROBABLY CHANGE SO THAT WE CAN SET RTT...
     private void send(RPCCall call){
         try{
-            byte[] data = call.getMessage().encode();
-            DatagramPacket packet = new DatagramPacket(data, 0, data.length, call.getMessage().getDestination());
-
             if(call instanceof RPCRequestCall){
-                byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
                 call.getMessage().setUID(routingTable.getDerivedUID());
+                byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
                 call.getMessage().setTransactionID(tid);
                 calls.put(new ByteWrapper(tid), call);
                 ((RPCRequestCall) call).sent();
             }
+
+            byte[] data = call.getMessage().encode();
+            DatagramPacket packet = new DatagramPacket(data, 0, data.length, call.getMessage().getDestination());
 
             server.send(packet);
 

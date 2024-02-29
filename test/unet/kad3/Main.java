@@ -5,6 +5,7 @@ import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
 import java.net.Inet4Address;
+import java.net.InetAddress;
 
 public class Main {
 
@@ -39,8 +40,8 @@ public class Main {
         try{
             Kademlia k = new Kademlia("Kademlia");
             //k.setDHT(KDHT.class);
-            k.bind(8080);
-            //k.join();
+            //k.bind(8080);
+            k.join(6881, InetAddress.getByName("router.bittorrent.com"), 6881);
 
             //UID uid = k.getDHT().getUID();
             //System.out.println(uid);

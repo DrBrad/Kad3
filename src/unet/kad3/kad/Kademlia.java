@@ -9,6 +9,7 @@ import unet.kad3.utils.Node;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.SocketException;
 
 public class Kademlia {
@@ -38,21 +39,27 @@ public class Kademlia {
         //dht = new KDHT(server);
     }
 
-    public void join(InetAddress address, int port){
-        //join(new Node(address, port));
+    public void join(int localPort, InetAddress address, int port)throws SocketException {
+        join(localPort, new InetSocketAddress(address, port));
     }
 
-    public void join(Node n){
-        //NODE LOOKUP
-        //JOIN
-        //startRefresh();
+    public void join(int localPort, Node node)throws SocketException {
+        join(localPort, node.getAddress());
+    }
+
+    public void join(int localPort, InetSocketAddress address)throws SocketException {
+        bind(localPort);
+        dht.join(address);
+    }
+
+    public void bind()throws SocketException {
+        bind(0);
     }
 
     public void bind(int port)throws SocketException {
-        if(server.isRunning()){
-            throw new IllegalArgumentException("Server is already running.");
+        if(!server.isRunning()){
+            server.start(port);
         }
-        server.start(port);
 
         if(dht != null){
             dht.start();

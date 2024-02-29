@@ -8,7 +8,7 @@ import java.util.List;
 
 public abstract class RoutingTable {
 
-    public UID uid;
+    protected UID uid;
 
     public abstract void updatePublicIPConsensus(InetAddress source, InetAddress addr);
 

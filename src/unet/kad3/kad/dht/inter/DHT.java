@@ -13,13 +13,14 @@ import unet.kad3.routing.kb.KBucket;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
+import java.net.InetSocketAddress;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
 public class DHT implements RPCServer.RequestListener {
 
-    public static final int THREAD_POOL_SIZE = 3;
+    //public static final int THREAD_POOL_SIZE = 3;
     public static final long BUCKET_REFRESH_TIME = 3600000;
 
     private Timer refreshTimer;
@@ -28,14 +29,29 @@ public class DHT implements RPCServer.RequestListener {
 
     public DHT(RPCServer server){
         this.server = server;
+        //WE CAN START BY ATTEMPTING UPnP TO GET EXTERNAL IP OTHERWISE CONSENSUS IS NEEDED...
     }
 
     public void start(){
         server.addRequestListener(this);
+    }
 
-        //WE CAN START BY ATTEMPTING UPnP TO GET EXTERNAL IP OTHERWISE CONSENSUS IS NEEDED...
+    public void join(InetSocketAddress address){
+        findNode(address, new MessageCallback(){
+            @Override
+            public void onResponse(MessageBase request, MessageBase response){
+                System.out.println(response.getBencode());
+                FindNodeResponse r = (FindNodeResponse) response;
 
-        startRefresh();
+                for(Node n : r.getAllNodes()){
+                    server.getRoutingTable().insert(n);
+                    System.out.println(n);
+                }
+
+                //startRefresh();
+            }
+        }, server.getRoutingTable().getDerivedUID());
+
     }
 
     public void stop(){
@@ -43,7 +59,7 @@ public class DHT implements RPCServer.RequestListener {
         stopRefresh();
     }
 
-    private void startRefresh(){
+    public void startRefresh(){
         if(refreshTimer == null && refreshTimerTask == null){
             refreshTimer = new Timer(true);
             refreshTimerTask = new TimerTask(){
@@ -56,7 +72,7 @@ public class DHT implements RPCServer.RequestListener {
                             final List<Node> closest = server.getRoutingTable().findClosest(k, KBucket.MAX_BUCKET_SIZE);
                             if(!closest.isEmpty()){
                                 for(Node n : closest){
-                                    findNode(n, new MessageCallback(){
+                                    findNode(n.getAddress(), new MessageCallback(){
                                         @Override
                                         public void onResponse(MessageBase request, MessageBase response){
                                             System.out.println(response.toString());
@@ -122,9 +138,11 @@ public class DHT implements RPCServer.RequestListener {
     }
 
     private void stopRefresh(){
-        refreshTimerTask.cancel();
-        refreshTimer.cancel();
-        refreshTimer.purge();
+        if(refreshTimer == null && refreshTimerTask == null){
+            refreshTimerTask.cancel();
+            refreshTimer.cancel();
+            refreshTimer.purge();
+        }
     }
 
     public UID getUID(){
@@ -167,9 +185,9 @@ public class DHT implements RPCServer.RequestListener {
         server.sendMessage(call);
     }
 
-    public void ping(Node node, MessageCallback callback){
+    public void ping(InetSocketAddress address, MessageCallback callback){
         PingRequest request = new PingRequest();
-        request.setDestination(node.getAddress());
+        request.setDestination(address);
 
         RPCRequestCall call = new RPCRequestCall(request);
         call.setMessageCallback(callback);
@@ -185,11 +203,13 @@ public class DHT implements RPCServer.RequestListener {
 
         RPCResponseCall call = new RPCResponseCall(response);
         server.sendMessage(call);
+
+        startRefresh();
     }
 
-    public void findNode(Node node, MessageCallback callback, UID target){
+    public void findNode(InetSocketAddress address, MessageCallback callback, UID target){
         FindNodeRequest request = new FindNodeRequest();
-        request.setDestination(node.getAddress());
+        request.setDestination(address);
         request.setTarget(target);
 
         RPCRequestCall call = new RPCRequestCall(request);
