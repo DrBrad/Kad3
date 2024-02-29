@@ -7,7 +7,6 @@ import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.List;
 
@@ -17,7 +16,6 @@ public class RoutingTest {
         RoutingTable r = new KRoutingTable();
         r.deriveUID();
 
-        //CHECKING KNOWN GOOD IDS
         r.insert(new Node("5fbfbff10c5d6a4ec8a88e4c6ab4c28b95eee401", InetAddress.getByName("124.31.75.21"), 1));
         r.insert(new Node("5a3ce9c14e7a08645677bbd1cfe7d8f956d53256", InetAddress.getByName("21.75.31.124"), 1));
         r.insert(new Node("a5d43220bc8f112a3d426c84764f8c2a1150e616", InetAddress.getByName("65.23.51.170"), 1));
