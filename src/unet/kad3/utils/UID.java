@@ -75,7 +75,7 @@ public class UID {
         int numByteZeroes = (ID_LENGTH-distance)/8;
         int numBitZeroes = 8-(distance%8);
 
-        for (int i = 0; i < numByteZeroes; i++){
+        for(int i = 0; i < numByteZeroes; i++){
             result[i] = 0;
         }
 
