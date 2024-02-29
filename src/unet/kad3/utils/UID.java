@@ -27,7 +27,8 @@ public class UID {
             throw new IllegalArgumentException("Key must be "+ID_LENGTH+" bytes");
         }
 
-        this.bid = bid;
+        this.bid = new byte[ID_LENGTH];
+        System.arraycopy(bid, 0, this.bid, 0, ID_LENGTH);
     }
 
 

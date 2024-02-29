@@ -6,7 +6,6 @@ import unet.kad3.utils.Node;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
-import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -73,7 +72,7 @@ public class FindNodeResponse extends MessageBase {
             position += 2;
 
             try{
-                nodes.add(new Node(bid, new InetSocketAddress(InetAddress.getByAddress(addr), port)));
+                nodes.add(new Node(bid, InetAddress.getByAddress(addr), port));
 
             }catch(UnknownHostException e){
                 e.printStackTrace();
