@@ -65,21 +65,21 @@ public class AddressUtils {
         return !(address.isAnyLocalAddress() || address.isLinkLocalAddress() || address.isLoopbackAddress() || address.isMulticastAddress() || address.isSiteLocalAddress());
     }
 
-    public static byte[] packAddress(InetAddress address, int port){
-        byte[] buf = address.getAddress();
+    public static byte[] packAddress(InetSocketAddress address){
+        byte[] buf = address.getAddress().getAddress();
 
-        if(address instanceof Inet4Address){
+        if(address.getAddress() instanceof Inet4Address){
             return new byte[]{
                     buf[0],
                     buf[1],
                     buf[2],
                     buf[3],
 
-                    (byte) ((port & 0xFF00) >> 8),
-                    (byte) (port & 0xFF)
+                    (byte) ((address.getPort() & 0xFF00) >> 8),
+                    (byte) (address.getPort() & 0xFF)
             };
 
-        }else if(address instanceof Inet6Address){
+        }else if(address.getAddress() instanceof Inet6Address){
             return new byte[]{
                     buf[0],
                     buf[1],
@@ -101,8 +101,8 @@ public class AddressUtils {
                     buf[14],
                     buf[15],
 
-                    (byte) ((port & 0xFF00) >> 8),
-                    (byte) (port & 0xFF)
+                    (byte) ((address.getPort() & 0xFF00) >> 8),
+                    (byte) (address.getPort() & 0xFF)
             };
         }
 

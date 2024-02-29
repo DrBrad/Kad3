@@ -6,6 +6,7 @@ import unet.kad3.utils.Node;
 
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.List;
@@ -72,7 +73,7 @@ public class FindNodeResponse extends MessageBase {
             position += 2;
 
             try{
-                nodes.add(new Node(bid, InetAddress.getByAddress(addr), port));
+                nodes.add(new Node(bid, new InetSocketAddress(InetAddress.getByAddress(addr), port)));
 
             }catch(UnknownHostException e){
                 e.printStackTrace();
@@ -104,7 +105,7 @@ public class FindNodeResponse extends MessageBase {
             System.arraycopy(bid, 0, buf, position, bid.length);
             position += bid.length;
 
-            byte[] addr = n.getAddress().getAddress();
+            byte[] addr = n.getHostAddress().getAddress();
             System.arraycopy(addr, 0, buf, position, addr.length);
             position += addr.length;
 
@@ -118,7 +119,7 @@ public class FindNodeResponse extends MessageBase {
     }
 
     public void addNode(Node node){
-        if(node.getAddress() instanceof Inet4Address){
+        if(node.getHostAddress() instanceof Inet4Address){
             if(ipv4Nodes.size() > NODE_CAP){
                 throw new IllegalArgumentException("Node cap already reached, the node cap is "+NODE_CAP);
             }
@@ -136,7 +137,7 @@ public class FindNodeResponse extends MessageBase {
 
     public void addNodes(List<Node> nodes){
         for(Node n : nodes){
-            if(n.getAddress() instanceof Inet4Address){
+            if(n.getHostAddress() instanceof Inet4Address){
                 if(ipv4Nodes.size() < NODE_CAP){
                     ipv4Nodes.add(n);
                 }
@@ -150,14 +151,14 @@ public class FindNodeResponse extends MessageBase {
     }
 
     public boolean containsNode(Node node){
-        if(node.getAddress() instanceof Inet4Address){
+        if(node.getHostAddress() instanceof Inet4Address){
             return ipv4Nodes.contains(node);
         }
         return ipv6Nodes.contains(node);
     }
 
     public boolean removeNode(Node node){
-        if(node.getAddress() instanceof Inet4Address){
+        if(node.getHostAddress() instanceof Inet4Address){
             return ipv4Nodes.remove(node);
         }
         return ipv6Nodes.remove(node);

@@ -5,6 +5,7 @@ import unet.kad3.utils.net.AddressUtils;
 import unet.kad3.utils.UID;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 
 import static unet.kad3.Build.*;
 
@@ -16,8 +17,9 @@ public class MessageBase {
 
     protected byte[] tid;
 
-    protected InetAddress destinationIP, originIP, publicIP; //LOTS OF QUESTIONS WITH THIS...
-    protected int destinationPort, originPort;
+    //protected InetAddress destinationIP, originIP, publicIP; //LOTS OF QUESTIONS WITH THIS...
+    protected InetSocketAddress destination, origin;
+    //protected int destinationPort, originPort;
 
 
 
@@ -48,9 +50,9 @@ public class MessageBase {
 
             case RSP_MSG:
                 ben.put("r", new BencodeObject());
-                if(destinationIP != null){
+                if(destination != null){
                     //ben.put("ip", AddressUtils.packAddress(publicIP, originPort)); //PACK MY IP ADDRESS
-                    ben.put("ip", AddressUtils.packAddress(destinationIP, destinationPort)); //PACK MY IP ADDRESS
+                    ben.put("ip", AddressUtils.packAddress(destination)); //PACK MY IP ADDRESS
                 }
                 ben.getBencodeObject("r").put("id", uid.getBytes());
                 break;
@@ -77,6 +79,54 @@ public class MessageBase {
     }
 
 
+    public InetSocketAddress getDestination(){
+        return destination;
+    }
+
+    public InetAddress getDestinationAddress(){
+        return destination.getAddress();
+    }
+
+    public int getDestinationPort(){
+        return destination.getPort();
+    }
+
+    public void setDestination(InetAddress address, int port){
+        destination = new InetSocketAddress(address, port);
+    }
+
+    public void setDestination(InetSocketAddress destination){
+        this.destination = destination;
+    }
+
+    public InetSocketAddress getOrigin(){
+        return origin;
+    }
+
+    public InetAddress getOriginAddress(){
+        return origin.getAddress();
+    }
+
+    public int getOriginPort(){
+        return origin.getPort();
+    }
+
+    public void setOrigin(InetAddress address, int port){
+        origin = new InetSocketAddress(address, port);
+    }
+
+    public void setOrigin(InetSocketAddress origin){
+        this.origin = origin;
+    }
+    /*
+    public void setDestination(InetAddress address, int port){
+        destination = new InetSocketAddress(address, port);
+    }
+
+    public void setDestination(InetSocketAddress destination){
+        this.destination = destination;
+    }
+    /*
     public void setDestination(InetAddress address, int port){
         this.destinationIP = address;
         this.destinationPort = port;
@@ -112,6 +162,7 @@ public class MessageBase {
     public InetAddress getPublicIP(){
         return publicIP;
     }
+    */
 
     public Method getMethod(){
         return m;

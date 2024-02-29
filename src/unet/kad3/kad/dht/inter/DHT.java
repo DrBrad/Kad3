@@ -168,7 +168,7 @@ public class DHT implements RPCServer.RequestListener {
         */
 
         PingResponse response = new PingResponse(request.getTransactionID());
-        response.setDestination(request.getOriginIP(), request.getOriginPort());
+        response.setDestination(request.getOrigin());
         response.setTransactionID(request.getTransactionID());
 
         RPCResponseCall call = new RPCResponseCall(response);
@@ -177,7 +177,7 @@ public class DHT implements RPCServer.RequestListener {
 
     public void ping(Node node, MessageCallback callback){
         PingRequest request = new PingRequest();
-        request.setDestination(node.getAddress(), node.getPort());
+        request.setDestination(node.getAddress());
         sendMessage(request, callback);
     }
 
@@ -207,14 +207,14 @@ public class DHT implements RPCServer.RequestListener {
         */
 
         FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
-        response.setDestination(request.getOriginIP(), request.getOriginPort());
+        response.setDestination(request.getOrigin());
         response.setTransactionID(request.getTransactionID());
         //request.getServer().sendMessage(response);
     }
 
     public void findNode(Node node, MessageCallback callback, UID target){
         FindNodeRequest request = new FindNodeRequest();
-        request.setDestination(node.getAddress(), node.getPort());
+        request.setDestination(node.getAddress());
         request.setTarget(target);
         sendMessage(request, callback);
     }

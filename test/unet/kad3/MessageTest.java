@@ -19,7 +19,7 @@ public class MessageTest {
 
     public static void main(String[] args)throws UnknownHostException {
         UID uid = new UID("992c105ffed716245654fd4c2c4d71e0f2df58cc");
-        pingRequest(uid);
+        //pingRequest(uid);
         findNodeRequest(uid);
     }
 

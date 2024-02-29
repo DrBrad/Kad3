@@ -292,9 +292,9 @@ public class RPCServer {
                 MessageBase m = d.decodeResponse(call.getMessage().getMethod());
                 m.setOrigin(packet.getAddress(), packet.getPort());
 
-                if(m.getPublicIP() != null){
-                    routingTable.updatePublicIPConsensus(m.getOriginIP(), m.getPublicIP());
-                }
+                //if(m.getPublicIP() != null){
+                //    routingTable.updatePublicIPConsensus(m.getOriginIP(), m.getPublicIP());
+                //}
 
                 call.getMessageCallback().onResponse(call.getMessage(), m);
                 break;
@@ -305,7 +305,7 @@ public class RPCServer {
     private void send(RPCCall call){
         try{
             byte[] data = call.getMessage().encode();
-            DatagramPacket packet = new DatagramPacket(data, 0, data.length, call.getMessage().getDestinationIP(), call.getMessage().getDestinationPort());
+            DatagramPacket packet = new DatagramPacket(data, 0, data.length, call.getMessage().getDestination());
 
             //SET ORIGIN...?
 
@@ -325,7 +325,7 @@ public class RPCServer {
     }
 
     public void sendMessage(RPCCall call){
-        if(call.getMessage().getDestinationIP() == null){
+        if(call.getMessage().getDestination() == null){
             throw new IllegalArgumentException("Message destination set to null");
         }
 

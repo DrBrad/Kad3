@@ -3,6 +3,7 @@ package unet.kad3.utils;
 import unet.kad3.libs.CRC32C;
 
 import java.net.InetAddress;
+import java.net.InetSocketAddress;
 import java.util.Random;
 
 public class Node {
@@ -12,8 +13,9 @@ public class Node {
     public static long QUERY_TIME = 3600000;
 
     protected UID uid;
-    protected InetAddress address;
-    protected int port;
+    protected InetSocketAddress address;
+    //protected InetAddress address;
+    //protected int port;
 
     private int stale;
     private long lastSeen;
@@ -62,21 +64,32 @@ public class Node {
     //CREATE NODE BY HEX AS WELL...
 
     public Node(String uid, InetAddress address, int port){
-        this(new UID(uid), address, port);
+        this(new UID(uid), new InetSocketAddress(address, port));
+    }
+
+    public Node(String uid, InetSocketAddress address){
+        this(new UID(uid), address);
     }
 
     public Node(byte[] bid, InetAddress address, int port){
-        this(new UID(bid), address, port);
+        this(new UID(bid), new InetSocketAddress(address, port));
+    }
+
+    public Node(byte[] bid, InetSocketAddress address){
+        this(new UID(bid), address);
     }
 
     public Node(UID uid, InetAddress address, int port){
+        this(uid, new InetSocketAddress(address, port));
+    }
+
+    public Node(UID uid, InetSocketAddress address){
         this.uid = uid;
         this.address = address;
-        this.port = port;
     }
 
     public boolean hasSecureID(){
-        byte[] ip = address.getAddress();
+        byte[] ip = address.getAddress().getAddress();
         byte[] mask = ip.length == 4 ? V4_MASK : V6_MASK;
 
         for(int i = 0; i < mask.length; i++){
@@ -102,12 +115,16 @@ public class Node {
         return uid;
     }
 
-    public InetAddress getAddress(){
+    public InetSocketAddress getAddress(){
         return address;
     }
 
+    public InetAddress getHostAddress(){
+        return address.getAddress();
+    }
+
     public int getPort(){
-        return port;
+        return address.getPort();
     }
 
 
@@ -143,7 +160,7 @@ public class Node {
 
     @Override
     public int hashCode(){
-        return address.hashCode()+port;
+        return address.hashCode()+address.getPort();
     }
 
     @Override
@@ -157,6 +174,6 @@ public class Node {
 
     @Override
     public String toString(){
-        return "{ \033[0;34mUID\033[0m: \033[0;35m"+uid.toString()+"\033[0m, \033[0;34mADDRESS\033[0m: \033[0;35m"+address.getHostAddress()+"\033[0m, \033[0;34mPORT\033[0m: \033[0;35m"+port+"\033[0m }";
+        return "{ \033[0;34mUID\033[0m: \033[0;35m"+uid.toString()+"\033[0m, \033[0;34mADDRESS\033[0m: \033[0;35m"+address.getAddress().getHostAddress()+"\033[0m, \033[0;34mPORT\033[0m: \033[0;35m"+address.getPort()+"\033[0m }";
     }
 }

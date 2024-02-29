@@ -7,6 +7,7 @@ import unet.kad3.messages.PingRequest;
 import unet.kad3.messages.PingResponse;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.utils.UID;
+import unet.kad3.utils.net.AddressUtils;
 
 public class MessageDecoder {
 
@@ -98,6 +99,7 @@ public class MessageDecoder {
 
         //MAYBE DO THIS BETTER?
         message.setUID(new UID(ben.getBencodeObject("r").getBytes("id")));
+        message.setDestination(AddressUtils.unpackAddress(ben.getBytes("ip")));
         //message.setVersion(ben.getDouble("v"));
 
 
