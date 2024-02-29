@@ -307,8 +307,6 @@ public class RPCServer {
             byte[] data = call.getMessage().encode();
             DatagramPacket packet = new DatagramPacket(data, 0, data.length, call.getMessage().getDestination());
 
-            //SET ORIGIN...?
-
             if(call instanceof RPCRequestCall){
                 byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
                 call.getMessage().setUID(routingTable.getDerivedUID());
