@@ -29,12 +29,12 @@ public class FindNodeResponse extends MessageBase {
 
     protected void decode(BencodeObject ben){
         if(ben.containsKey("nodes")){
-            byte[] buf = ben.getBencodeObject("r").getBytes("nodes");
+            byte[] buf = ben.getBytes("nodes");
             addNodes(buf, Types.IPv4);
         }
 
         if(ben.containsKey("nodes6")){
-            byte[] buf = ben.getBencodeObject("r").getBytes("nodes6");
+            byte[] buf = ben.getBytes("nodes6");
             addNodes(buf, Types.IPv6);
         }
     }
@@ -96,7 +96,7 @@ public class FindNodeResponse extends MessageBase {
                 return null;
         }
 
-        byte[] buf = new byte[nodes.size()*ID_LENGTH*IPV6_LENGTH*2];
+        byte[] buf = new byte[nodes.size()*(ID_LENGTH+type.getAddressLength()+2)];
         int position = 0;
 
         for(Node n : nodes){
@@ -132,6 +132,21 @@ public class FindNodeResponse extends MessageBase {
         }
 
         ipv6Nodes.add(node);
+    }
+
+    public void addNodes(List<Node> nodes){
+        for(Node n : nodes){
+            if(n.getAddress() instanceof Inet4Address){
+                if(ipv4Nodes.size() < NODE_CAP){
+                    ipv4Nodes.add(n);
+                }
+                continue;
+            }
+
+            if(ipv6Nodes.size() < NODE_CAP){
+                ipv6Nodes.add(n);
+            }
+        }
     }
 
     public boolean containsNode(Node node){
