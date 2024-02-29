@@ -47,7 +47,7 @@ public class MessageTest {
     public static void pingResponse(PingRequest m, UID uid)throws UnknownHostException {
         PingResponse r = new PingResponse(m.getTransactionID());
         r.setUID(uid);
-        r.setDestination(Inet4Address.getLocalHost(), 8080);
+        r.setPublic(Inet4Address.getLocalHost(), 8080);
         System.out.println("PING RESPONSE:");
         System.out.println(r);
         checkResponse(m.getMethod(), r);
@@ -56,7 +56,7 @@ public class MessageTest {
     public static void findNodeResponse(FindNodeRequest m, UID uid)throws UnknownHostException {
         FindNodeResponse r = new FindNodeResponse(m.getTransactionID());
         r.setUID(uid);
-        r.setDestination(Inet4Address.getLocalHost(), 8080);
+        r.setPublic(Inet4Address.getLocalHost(), 8080);
 
         //CHECKING KNOWN GOOD IDS
         r.addNode(new Node("5fbfbff10c5d6a4ec8a88e4c6ab4c28b95eee401", InetAddress.getByName("124.31.75.21"), 1));

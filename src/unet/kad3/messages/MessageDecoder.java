@@ -99,7 +99,7 @@ public class MessageDecoder {
 
         //MAYBE DO THIS BETTER?
         message.setUID(new UID(ben.getBencodeObject("r").getBytes("id")));
-        message.setDestination(AddressUtils.unpackAddress(ben.getBytes("ip")));
+        message.setPublic(AddressUtils.unpackAddress(ben.getBytes("ip")));
         //message.setVersion(ben.getDouble("v"));
 
 

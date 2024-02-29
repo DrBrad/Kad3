@@ -292,9 +292,9 @@ public class RPCServer {
                 MessageBase m = d.decodeResponse(call.getMessage().getMethod());
                 m.setOrigin(packet.getAddress(), packet.getPort());
 
-                //if(m.getPublicIP() != null){
-                //    routingTable.updatePublicIPConsensus(m.getOriginIP(), m.getPublicIP());
-                //}
+                if(m.getPublic() != null){
+                    routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
+                }
 
                 call.getMessageCallback().onResponse(call.getMessage(), m);
                 break;

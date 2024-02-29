@@ -18,7 +18,7 @@ public class MessageBase {
     protected byte[] tid;
 
     //protected InetAddress destinationIP, originIP, publicIP; //LOTS OF QUESTIONS WITH THIS...
-    protected InetSocketAddress destination, origin;
+    protected InetSocketAddress destination, origin, publicAddress;
     //protected int destinationPort, originPort;
 
 
@@ -50,11 +50,11 @@ public class MessageBase {
 
             case RSP_MSG:
                 ben.put("r", new BencodeObject());
-                if(destination != null){
-                    //ben.put("ip", AddressUtils.packAddress(publicIP, originPort)); //PACK MY IP ADDRESS
-                    ben.put("ip", AddressUtils.packAddress(destination)); //PACK MY IP ADDRESS
-                }
                 ben.getBencodeObject("r").put("id", uid.getBytes());
+
+                if(publicAddress != null){
+                    ben.put("ip", AddressUtils.packAddress(publicAddress)); //PACK MY IP ADDRESS
+                }
                 break;
         }
 
@@ -78,6 +78,25 @@ public class MessageBase {
         return tid;
     }
 
+    public InetSocketAddress getPublic(){
+        return publicAddress;
+    }
+
+    public InetAddress getPublicAddress(){
+        return publicAddress.getAddress();
+    }
+
+    public int getPublicPort(){
+        return publicAddress.getPort();
+    }
+
+    public void setPublic(InetAddress address, int port){
+        publicAddress = new InetSocketAddress(address, port);
+    }
+
+    public void setPublic(InetSocketAddress publicAddress){
+        this.publicAddress = publicAddress;
+    }
 
     public InetSocketAddress getDestination(){
         return destination;
