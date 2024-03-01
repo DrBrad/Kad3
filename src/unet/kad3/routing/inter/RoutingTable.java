@@ -34,8 +34,12 @@ public abstract class RoutingTable {
 
     public abstract int getBucketUID(UID k);
 
+    public abstract List<Node> getAllNodes();
+
     public abstract List<Node> findClosest(UID k, int r);
 
     public abstract int getBucketSize(int i);
+
+    public abstract List<Node> getAllUnqueriedNodes();
 
 }

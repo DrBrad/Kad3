@@ -259,6 +259,7 @@ public class KRoutingTable extends RoutingTable {
     }
 */
 
+    @Override
     public synchronized List<Node> getAllNodes(){
         List<Node> nodes = new ArrayList<>();
         for(KBucket kBucket : kBuckets){
@@ -309,8 +310,21 @@ public class KRoutingTable extends RoutingTable {
     }
     */
 
+    @Override
     public synchronized int getBucketSize(int i){
         return kBuckets[i].size();
+    }
+
+    @Override
+    public synchronized List<Node> getAllUnqueriedNodes(){
+        List<Node> contacts = new ArrayList<>();
+        long now = System.currentTimeMillis();
+
+        for(KBucket b : kBuckets){
+            contacts.addAll(b.getUnQueriedNodes(now));
+        }
+
+        return contacts;
     }
 
     /*

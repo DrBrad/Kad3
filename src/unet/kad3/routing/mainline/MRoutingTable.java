@@ -142,6 +142,11 @@ public class MRoutingTable extends RoutingTable {
 
 
     @Override
+    public synchronized List<Node> getAllNodes(){
+        return null;
+    }
+
+    @Override
     public synchronized List<Node> findClosest(UID k, int r){
         return null;
     }
@@ -149,5 +154,10 @@ public class MRoutingTable extends RoutingTable {
     @Override
     public synchronized int getBucketSize(int i){
         return mBuckets.get(i).size();
+    }
+
+    @Override
+    public synchronized List<Node> getAllUnqueriedNodes(){
+        return null;
     }
 }

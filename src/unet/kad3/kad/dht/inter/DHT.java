@@ -87,6 +87,7 @@ public class DHT implements RPCServer.RequestListener {
                                         @Override
                                         public void onResponse(MessageBase request, MessageBase response){
                                             //System.out.println(response.toString());
+                                            n.setSeen();
 
                                             FindNodeResponse r = (FindNodeResponse) response;
 
@@ -108,11 +109,16 @@ public class DHT implements RPCServer.RequestListener {
                         }
                     }
 
-                    /*
-                    List<Contact> contacts = server.getRoutingTable().getAllUnqueriedNodes();
-                    if(!contacts.isEmpty()){
-                        for(Contact c : contacts){
-                            new PingMessage(routingTable, c.getNode()).execute();
+                    List<Node> nodes = server.getRoutingTable().getAllUnqueriedNodes();
+                    System.out.println("NODES: "+nodes.size());
+                    if(!nodes.isEmpty()){
+                        for(Node n : nodes){
+                            ping(n.getAddress(), new MessageCallback(){
+                                @Override
+                                public void onResponse(MessageBase request, MessageBase response){
+                                    n.setSeen();
+                                }
+                            });
                         }
                     }
 

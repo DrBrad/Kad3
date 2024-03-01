@@ -149,8 +149,6 @@ public class RPCServer {
                     routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
                 }
 
-                received++;
-                System.out.println(received+"  "+sent);
                 call.getMessageCallback().onResponse(call.getMessage(), m);
                 break;
         }
@@ -162,11 +160,9 @@ public class RPCServer {
         */
     }
 
-    private int sent = 0, received = 0;
     //PROBABLY CHANGE SO THAT WE CAN SET RTT...
     private void send(RPCCall call){
         try{
-            sent++;
             call.getMessage().setUID(routingTable.getDerivedUID());
 
             if(call instanceof RPCRequestCall){

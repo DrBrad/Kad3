@@ -65,11 +65,11 @@ public class KBucket {
         ArrayList<Node> q = new ArrayList<>();
         //long now = System.currentTimeMillis();
 
-        nodes.forEach(n -> {
-            if(n.hasQueried(now)){
+        for(Node n : nodes){
+            if(!n.hasQueried(now)){
                 q.add(n);
             }
-        });
+        }
 
         return q;
     }
@@ -118,19 +118,6 @@ public class KBucket {
     public List<Node> getContacts(){
         contacts.sort(new LSComparetor());
         return contacts;
-    }
-
-    public List<Node> getUnQueriedContacts(){
-        ArrayList<Contact> q = new ArrayList<>();
-        long now = System.currentTimeMillis();
-
-        for(Contact c : contacts){
-            if(!c.hasQueriedInHour(now)){
-                q.add(c);
-            }
-        }
-
-        return q;
     }
     */
 }
