@@ -8,7 +8,8 @@ import unet.kad3.messages.inter.MessageCallback;
 public class RPCRequestCall extends RPCCall {
 
     private MessageCallback callback;
-    private long sentTime = -1, responseTime = -1, expectedRTT = -1;
+    private long sentTime = -1;
+    public static final long STALLED_TIME = 60000;
 
     public RPCRequestCall(MessageBase message){
         super(message);
@@ -30,7 +31,7 @@ public class RPCRequestCall extends RPCCall {
         return sentTime;
     }
 
-    public long getResponseTime(){
-        return responseTime;
+    public boolean isStalled(long now){
+        return (now-sentTime > STALLED_TIME);
     }
 }

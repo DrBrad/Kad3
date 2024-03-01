@@ -20,6 +20,8 @@ import java.util.TimerTask;
 
 public class DHT implements RPCServer.RequestListener {
 
+    //DONT DO DHT AS SEPERATE CLASS CHANGE THIS...
+
     //public static final int THREAD_POOL_SIZE = 3;
     public static final long BUCKET_REFRESH_TIME = 30000;//3600000;
 

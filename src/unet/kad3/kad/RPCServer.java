@@ -6,6 +6,7 @@ import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.ByteWrapper;
+import unet.kad3.utils.net.AddressUtils;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -26,7 +27,7 @@ public class RPCServer {
     private final ConcurrentLinkedQueue<DatagramPacket> receivePool;
     private final ConcurrentLinkedQueue<RPCCall> sendPool;
 
-    private final ConcurrentHashMap<ByteWrapper, RPCCall> calls;
+    private final ConcurrentHashMap<ByteWrapper, RPCRequestCall> calls;
     private final List<RequestListener> requestListeners;
     private final RoutingTable routingTable;
 
@@ -80,7 +81,7 @@ public class RPCServer {
                         send(sendPool.poll());
                     }
 
-                    //CLEAR CALLS THAT ARE PAST RTT...
+                    removeStalled();
                 }
             }
         }).start();
@@ -111,7 +112,11 @@ public class RPCServer {
     }
 
     private void receive(DatagramPacket packet){
-        if(packet.getPort() == 0){
+        //if(packet.getPort() == 0){
+        //    return;
+        //}
+
+        if(AddressUtils.isBogon(packet.getAddress(), packet.getPort())){
             return;
         }
 
@@ -125,6 +130,7 @@ public class RPCServer {
                     if(m == null){ // DONT DO THIS CHECK LATER ON...
                         return;
                     }
+
                     m.setOrigin(packet.getAddress(), packet.getPort());
 
                     for(RequestListener listener : requestListeners){
@@ -140,10 +146,16 @@ public class RPCServer {
                     return;
                 }
 
-                RPCRequestCall call = (RPCRequestCall) calls.get(tid);
+                RPCRequestCall call = calls.get(tid);
                 calls.remove(tid);
                 MessageBase m = d.decodeResponse(call.getMessage().getMethod());
                 m.setOrigin(packet.getAddress(), packet.getPort());
+
+                //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
+                if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
+                        packet.getPort() != call.getMessage().getDestinationPort()){
+                    return;
+                }
 
                 if(m.getPublic() != null){
                     routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
@@ -168,7 +180,7 @@ public class RPCServer {
             if(call instanceof RPCRequestCall){
                 byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
                 call.getMessage().setTransactionID(tid);
-                calls.put(new ByteWrapper(tid), call);
+                calls.put(new ByteWrapper(tid), (RPCRequestCall) call);
                 ((RPCRequestCall) call).sent();
             }
 
@@ -186,6 +198,20 @@ public class RPCServer {
 
         }catch(IOException | NoSuchAlgorithmException e){
             e.printStackTrace();
+        }
+    }
+
+    private void removeStalled(){
+        long now = System.currentTimeMillis();
+        for(ByteWrapper tid : calls.keySet()){
+            RPCRequestCall call = calls.get(tid);
+            if(!call.isStalled(now)){
+                continue;
+            }
+
+            calls.remove(tid);
+
+            //call.getMessageCallback().onResponse(call.getMessage());
         }
     }
 
