@@ -16,6 +16,11 @@ public class RoutingTest {
         RoutingTable r = new KRoutingTable();
         r.deriveUID();
 
+        insert(r);
+        consensus(r);
+    }
+
+    public static void insert(RoutingTable r)throws UnknownHostException {
         r.insert(new Node("5fbfbff10c5d6a4ec8a88e4c6ab4c28b95eee401", InetAddress.getByName("124.31.75.21"), 1));
         r.insert(new Node("5a3ce9c14e7a08645677bbd1cfe7d8f956d53256", InetAddress.getByName("21.75.31.124"), 1));
         r.insert(new Node("a5d43220bc8f112a3d426c84764f8c2a1150e616", InetAddress.getByName("65.23.51.170"), 1));
@@ -73,5 +78,40 @@ public class RoutingTest {
         for(Node n : nodes){
             System.out.println(n);
         }
+    }
+
+    public static void consensus(RoutingTable r)throws UnknownHostException{
+        InetAddress external = InetAddress.getByName("186.60.165.238");
+        r.updatePublicIPConsensus(InetAddress.getByName("124.31.75.21"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("21.75.31.124"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("21.75.31.124"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("84.124.73.14"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("43.213.53.83"), external);
+
+        r.updatePublicIPConsensus(InetAddress.getByName("186.114.205.58"), InetAddress.getByName("33.13.77.5"));
+        r.updatePublicIPConsensus(InetAddress.getByName("55.121.36.140"), InetAddress.getByName("33.13.77.5"));
+        r.updatePublicIPConsensus(InetAddress.getByName("200.0.237.192"), InetAddress.getByName("33.13.77.5"));
+        r.updatePublicIPConsensus(InetAddress.getByName("50.184.60.76"), InetAddress.getByName("33.13.77.5"));
+        r.updatePublicIPConsensus(InetAddress.getByName("110.9.17.14"), InetAddress.getByName("33.13.77.5"));
+
+        r.updatePublicIPConsensus(InetAddress.getByName("225.150.72.107"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("236.72.56.71"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("107.222.209.217"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("115.61.238.72"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("211.55.90.189"), external);
+
+        r.updatePublicIPConsensus(InetAddress.getByName("177.222.15.120"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("70.217.219.175"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("3.216.83.255"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("245.158.65.102"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("146.14.113.231"), external);
+
+        r.updatePublicIPConsensus(InetAddress.getByName("112.106.57.62"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("151.58.161.102"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("250.221.0.142"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("89.52.19.81"), external);
+        r.updatePublicIPConsensus(InetAddress.getByName("11.35.168.232"), external);
+
+        System.out.println(r.getConsensusExternalAddress());
     }
 }

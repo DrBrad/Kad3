@@ -103,7 +103,9 @@ public class MessageDecoder {
         }
 
         message.setUID(new UID(ben.getBencodeObject("r").getBytes("id")));
-        message.setPublic(AddressUtils.unpackAddress(ben.getBytes("ip")));
+        if(ben.containsKey("ip")){
+            message.setPublic(AddressUtils.unpackAddress(ben.getBytes("ip")));
+        }
         //message.setVersion(ben.getDouble("v"));
 
         return message;

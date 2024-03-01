@@ -53,7 +53,7 @@ public class KRoutingTable extends RoutingTable {
 
         synchronized(originPairs){
             originPairs.put(source, addr);
-            System.err.println("CONSENSUS UPDATE: "+originPairs.size());
+            System.err.println("CONSENSUS UPDATE: "+originPairs.size()+"  "+source.getHostAddress()+"  "+addr.getHostAddress());
             if(originPairs.size() > 20 && !addr.equals(consensusExternalAddress)){
                 List<InetAddress> k = new ArrayList<>(originPairs.values());
                 short res = 0, count = 1;
@@ -69,7 +69,6 @@ public class KRoutingTable extends RoutingTable {
 
                 //CHANGE - TO AUTO UPDATE UID BASED OFF OF IP CONSENSUS CHANGES
                 if(consensusExternalAddress != k.get(res)){
-                    //UPDATE UID
                     consensusExternalAddress = k.get(res);
                     deriveUID();
                 }

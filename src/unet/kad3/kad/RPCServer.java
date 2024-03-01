@@ -115,7 +115,7 @@ public class RPCServer {
             return;
         }
 
-        try{
+        //try{
         MessageDecoder d = new MessageDecoder(packet.getData());
 
         switch(d.getType()){
@@ -154,10 +154,12 @@ public class RPCServer {
                 call.getMessageCallback().onResponse(call.getMessage(), m);
                 break;
         }
+        /*
         }catch (Exception e){
             e.printStackTrace();
             System.out.println(new String(packet.getData()));
         }
+        */
     }
 
     private int sent = 0, received = 0;
@@ -174,17 +176,19 @@ public class RPCServer {
                 ((RPCRequestCall) call).sent();
             }
 
-            try{
+            //try{
             byte[] data = call.getMessage().encode();
             DatagramPacket packet = new DatagramPacket(data, 0, data.length, call.getMessage().getDestination());
 
             server.send(packet);
+            /*
             }catch (Exception e){
                 e.printStackTrace();
                 System.out.println(call.getMessage());
             }
+            */
 
-        }catch(/*IOException | */NoSuchAlgorithmException e){
+        }catch(IOException | NoSuchAlgorithmException e){
             e.printStackTrace();
         }
     }

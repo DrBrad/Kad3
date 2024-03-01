@@ -45,8 +45,18 @@ public class DHT implements RPCServer.RequestListener {
 
                 for(Node n : r.getAllNodes()){
                     server.getRoutingTable().insert(n);
-                    System.out.println(n);
+                    /*
+                    ping(n.getAddress(), new MessageCallback(){
+                        @Override
+                        public void onResponse(MessageBase request, MessageBase response){
+                            server.getRoutingTable().insert(n);
+                        }
+                    });
+                    */
+                    //System.out.println(n);
                 }
+
+                //CHECK IF PING CALLS ARE STILL ON-GOING...
 
                 startRefresh();
             }
@@ -82,12 +92,27 @@ public class DHT implements RPCServer.RequestListener {
 
                                             for(Node n : r.getAllNodes()){
                                                 server.getRoutingTable().insert(n);
-                                                System.out.println(n);
+                                                /*
+                                                ping(n.getAddress(), new MessageCallback(){
+                                                    @Override
+                                                    public void onResponse(MessageBase request, MessageBase response){
+                                                        server.getRoutingTable().insert(n);
+                                                    }
+                                                });
+                                                */
                                             }
                                         }
                                     }, k);
                                 }
                             }
+                        }
+                    }
+
+                    /*
+                    List<Contact> contacts = server.getRoutingTable().getAllUnqueriedNodes();
+                    if(!contacts.isEmpty()){
+                        for(Contact c : contacts){
+                            new PingMessage(routingTable, c.getNode()).execute();
                         }
                     }
 
