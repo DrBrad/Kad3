@@ -30,7 +30,8 @@ public class MessageDecoder {
         "y":"r",
         "r":{
             "id":"mnopqrstuvwxyz123456"
-        }
+        },
+        "ip": bytes
     }
     */
 
