@@ -1,5 +1,6 @@
 package unet.kad3.kad;
 
+import unet.kad3.kad.utils.RPCHandler;
 import unet.kad3.kad.utils.RefreshHandler;
 import unet.kad3.kad.utils.refresh.BucketRefresh;
 import unet.kad3.kad.utils.refresh.StaleRefresh;
@@ -40,6 +41,7 @@ public class Kademlia {
         refresh = new RefreshHandler();
         refresh.addOperation(new BucketRefresh(server));
         refresh.addOperation(new StaleRefresh(server));
+        //new RPCHandler()
         //dht = new KDHT(server);
     }
 

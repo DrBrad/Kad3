@@ -29,28 +29,26 @@ public class RPCServer {
 
     private DatagramSocket server;
     private final ConcurrentLinkedQueue<DatagramPacket> receivePool;
-    private final ConcurrentLinkedQueue<RPCCall> sendPool;
+    //private final ConcurrentLinkedQueue<MessageBase> sendPool;
 
-    //private final ConcurrentHashMap<ByteWrapper, RPCRequestCall> calls;
-    private final LinkedHashMap<ByteWrapper, RPCRequestCall> calls  = new LinkedHashMap<>(512, 0.75f, true){
+    private final ConcurrentHashMap<ByteWrapper, RPCRequestCall> calls;
+    /*private final LinkedHashMap<ByteWrapper, RPCRequestCall> calls  = new LinkedHashMap<>(512, 0.75f, true){
         @Override
         protected boolean removeEldestEntry(Map.Entry<ByteWrapper, RPCRequestCall> eldest){
             return (size() > 512);
         }
-    };
+    };*/
 
-    //private final List<RequestListener> requestListeners;
-    private final RoutingTable routingTable;
-    private final RPCHandler handler;
+    private final List<RequestListener> requestListeners;
+    protected final RoutingTable routingTable;
 
-    public RPCServer(RoutingTable routingTable, RPCHandler handler){
+    public RPCServer(RoutingTable routingTable){
         this.routingTable = routingTable;
-        this.handler = handler;
         //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
-        sendPool = new ConcurrentLinkedQueue<>();
-        //calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
-        //requestListeners = new ArrayList<>();
+        //sendPool = new ConcurrentLinkedQueue<>();
+        calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
+        requestListeners = new ArrayList<>();
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
     }
@@ -87,12 +85,14 @@ public class RPCServer {
             public void run(){
                 while(!server.isClosed()){
                     if(!receivePool.isEmpty()){
-                        receive(receivePool.poll());
+                        onReceive(receivePool.poll());
                     }
 
+                    /*
                     if(!sendPool.isEmpty()){
-                        send(sendPool.poll());
+                        //server.send(sendPool.poll());
                     }
+                    */
 
                     //removeStalled();
                 }
@@ -112,7 +112,6 @@ public class RPCServer {
         return (server != null) ? server.getLocalPort() : 0;
     }
 
-    /*
     public void addRequestListener(RequestListener listener){
         requestListeners.add(listener);
     }
@@ -120,27 +119,24 @@ public class RPCServer {
     public void removeRequestListener(RequestListener listener){
         requestListeners.remove(listener);
     }
-    */
 
     public RoutingTable getRoutingTable(){
         return routingTable;
     }
 
-    private void receive(DatagramPacket packet){
-        //if(packet.getPort() == 0){
-        //    return;
-        //}
-
+    public void onReceive(DatagramPacket packet){
         if(AddressUtils.isBogon(packet.getAddress(), packet.getPort())){
             return;
         }
 
-        //try{
         MessageDecoder d = new MessageDecoder(packet.getData());
 
         switch(d.getType()){
             case REQ_MSG: {
-                //if(!requestListeners.isEmpty()){
+                    if(requestListeners.isEmpty()){
+                        return;
+                    }
+
                     MessageBase m = d.decodeRequest();
                     if(m == null){ // DONT DO THIS CHECK LATER ON...
                         return;
@@ -148,11 +144,9 @@ public class RPCServer {
 
                     m.setOrigin(packet.getAddress(), packet.getPort());
 
-                    handler.receive(m);
-
-                    //for(RequestListener listener : requestListeners){
-                    //    listener.onRequest(m);
-                    //}
+                    for(RequestListener listener : requestListeners){
+                        listener.onRequest(m);
+                    }
                 }
                 break;
 
@@ -182,12 +176,96 @@ public class RPCServer {
                 }
                 break;
         }
+    }
+
+    public void send(RPCCall call){
+        try{
+            if(call.getMessage().getDestination() == null){
+                throw new IllegalArgumentException("Message destination set to null");
+            }
+
+            call.getMessage().setUID(routingTable.getDerivedUID());
+
+            switch(call.getMessage().getType()){
+                case REQ_MSG:
+                    byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
+                    call.getMessage().setTransactionID(tid);
+                    calls.put(new ByteWrapper(tid), (RPCRequestCall) call);
+                    ((RPCRequestCall) call).sent();
+                    break;
+            }
+
+            byte[] data = call.getMessage().encode();
+            DatagramPacket packet = new DatagramPacket(data, 0, data.length, call.getMessage().getDestination());
+
+            server.send(packet);
+        }catch(IOException | NoSuchAlgorithmException e){
+            e.printStackTrace();
+        }
+    }
+
+    /*
+    private void receive(DatagramPacket packet){
+        //if(packet.getPort() == 0){
+        //    return;
+        //}
+
+        if(AddressUtils.isBogon(packet.getAddress(), packet.getPort())){
+            return;
+        }
+
+        //try{
+        MessageDecoder d = new MessageDecoder(packet.getData());
+
+        switch(d.getType()){
+            case REQ_MSG:
+                if(!requestListeners.isEmpty()){
+                    MessageBase m = d.decodeRequest();
+                    if(m == null){ // DONT DO THIS CHECK LATER ON...
+                        return;
+                    }
+
+                    m.setOrigin(packet.getAddress(), packet.getPort());
+
+                    //handler.receive(m);
+
+                    for(RequestListener listener : requestListeners){
+                        listener.onRequest(m);
+                    }
+                }
+                break;
+
+            case RSP_MSG:
+                ByteWrapper tid = new ByteWrapper(d.getTransactionID());
+
+                if(!calls.containsKey(tid)){
+                    return;
+                }
+
+                RPCRequestCall call = calls.get(tid);
+                calls.remove(tid);
+                MessageBase m = d.decodeResponse(call.getMessage().getMethod());
+                m.setOrigin(packet.getAddress(), packet.getPort());
+
+                //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
+                if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
+                        packet.getPort() != call.getMessage().getDestinationPort()){
+                    return;
+                }
+
+                if(m.getPublic() != null){
+                    routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
+                }
+
+                call.getMessageCallback().onResponse(call.getMessage(), m);
+                break;
+        }
         /*
         }catch (Exception e){
             e.printStackTrace();
             System.out.println(new String(packet.getData()));
         }
-        */
+        *./
     }
 
     //PROBABLY CHANGE SO THAT WE CAN SET RTT...
@@ -212,12 +290,13 @@ public class RPCServer {
                 e.printStackTrace();
                 System.out.println(call.getMessage());
             }
-            */
+            *./
 
         }catch(IOException | NoSuchAlgorithmException e){
             e.printStackTrace();
         }
     }
+    */
 
     /*
     private void removeStalled(){
@@ -234,14 +313,6 @@ public class RPCServer {
         }
     }
     */
-
-    public void sendMessage(RPCCall call){
-        if(call.getMessage().getDestination() == null){
-            throw new IllegalArgumentException("Message destination set to null");
-        }
-
-        sendPool.offer(call);
-    }
 
     //DONT INIT EVERY TIME...
     private byte[] generateTransactionID()throws NoSuchAlgorithmException {
