@@ -2,12 +2,13 @@ package unet.kad3.kad;
 
 import unet.kad3.kad.utils.RPCHandler;
 import unet.kad3.kad.utils.RefreshHandler;
+import unet.kad3.kad.utils.operations.JoinOperation;
 import unet.kad3.kad.utils.refresh.BucketRefresh;
 import unet.kad3.kad.utils.refresh.StaleRefresh;
-import unet.kad3.kad.utils.refresh.inter.RefreshOperation;
 import unet.kad3.routing.BucketTypes;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
+import unet.kad3.utils.UID;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
@@ -54,8 +55,13 @@ public class Kademlia {
     }
 
     public void join(int localPort, InetSocketAddress address)throws SocketException {
-        bind(localPort);
+        //bind(localPort);
+        if(!server.isRunning()){
+            server.start(localPort);
+        }
         //dht.join(address);
+
+        new JoinOperation(server, refresh, address).run();
     }
 
     public void bind()throws SocketException {
@@ -83,6 +89,10 @@ public class Kademlia {
 
     public RefreshHandler getRefreshHandler(){
         return refresh;
+    }
+
+    public UID getUID(){
+        return server.getRoutingTable().getDerivedUID();
     }
 
     /*

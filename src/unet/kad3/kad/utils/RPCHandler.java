@@ -13,8 +13,9 @@ import unet.kad3.utils.UID;
 import java.net.DatagramPacket;
 import java.net.InetSocketAddress;
 
-public class RPCHandler implements RPCServer.RequestListener {
+public class RPCHandler {
 
+    /*
     private RPCServer server;
 
     public RPCHandler(RPCServer server){
@@ -76,4 +77,5 @@ public class RPCHandler implements RPCServer.RequestListener {
         call.setMessageCallback(callback);
         sendMessage(call);
     }
+    */
 }

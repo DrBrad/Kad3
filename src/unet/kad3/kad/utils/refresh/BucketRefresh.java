@@ -1,7 +1,10 @@
 package unet.kad3.kad.utils.refresh;
 
 import unet.kad3.kad.RPCServer;
-import unet.kad3.kad.utils.refresh.inter.RefreshOperation;
+import unet.kad3.kad.calls.RPCRequestCall;
+import unet.kad3.kad.utils.inter.Operation;
+import unet.kad3.kad.utils.operations.PingOperation;
+import unet.kad3.messages.FindNodeRequest;
 import unet.kad3.messages.FindNodeResponse;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.inter.MessageCallback;
@@ -11,7 +14,7 @@ import unet.kad3.utils.UID;
 
 import java.util.List;
 
-public class BucketRefresh implements RefreshOperation {
+public class BucketRefresh implements Operation {
 
     private RPCServer server;
 
@@ -28,27 +31,25 @@ public class BucketRefresh implements RefreshOperation {
                 final List<Node> closest = server.getRoutingTable().findClosest(k, KBucket.MAX_BUCKET_SIZE);
                 if(!closest.isEmpty()){
                     for(Node n : closest){
-                        findNode(n.getAddress(), new MessageCallback(){
-                            @Override
-                            public void onResponse(MessageBase request, MessageBase response){
-                                //System.out.println(response.toString());
-                                n.setSeen();
+                        FindNodeRequest request = new FindNodeRequest();
+                        request.setDestination(n.getAddress());
+                        request.setTarget(k);
 
-                                FindNodeResponse r = (FindNodeResponse) response;
+                        RPCRequestCall call = new RPCRequestCall(request);
+                        call.setMessageCallback(new MessageCallback(){
+                            @Override
+                            public void onResponse(MessageBase message){
+                                n.setSeen();
+                                FindNodeResponse r = (FindNodeResponse) message;
 
                                 for(Node n : r.getAllNodes()){
                                     server.getRoutingTable().insert(n);
-                                    /*
-                                    ping(n.getAddress(), new MessageCallback(){
-                                        @Override
-                                        public void onResponse(MessageBase request, MessageBase response){
-                                            server.getRoutingTable().insert(n);
-                                        }
-                                    });
-                                    */
                                 }
+
+                                new PingOperation(server, r.getAllNodes()).run();
                             }
-                        }, k);
+                        });
+                        server.send(call);
                     }
                 }
             }

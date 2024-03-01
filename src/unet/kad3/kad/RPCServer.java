@@ -39,7 +39,7 @@ public class RPCServer {
         }
     };*/
 
-    private final List<RequestListener> requestListeners;
+    //private final List<RequestListener> requestListeners;
     protected final RoutingTable routingTable;
 
     public RPCServer(RoutingTable routingTable){
@@ -48,7 +48,7 @@ public class RPCServer {
         receivePool = new ConcurrentLinkedQueue<>();
         //sendPool = new ConcurrentLinkedQueue<>();
         calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
-        requestListeners = new ArrayList<>();
+        //requestListeners = new ArrayList<>();
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
     }
@@ -56,7 +56,7 @@ public class RPCServer {
     public void start(int port)throws SocketException {
         //We add the packet to a pool so that we can read in a different thread so that we don't affect the RPC thread
         //without doing 2 threads we may clog up the RPC server and miss packets
-        if(server != null){
+        if(isRunning()){
             throw new IllegalArgumentException("Server has already started.");
         }
 
@@ -101,6 +101,9 @@ public class RPCServer {
     }
 
     public void stop(){
+        if(!isRunning()){
+            throw new IllegalArgumentException("Server is not currently running.");
+        }
         server.close();
     }
 
@@ -112,6 +115,7 @@ public class RPCServer {
         return (server != null) ? server.getLocalPort() : 0;
     }
 
+    /*
     public void addRequestListener(RequestListener listener){
         requestListeners.add(listener);
     }
@@ -119,8 +123,10 @@ public class RPCServer {
     public void removeRequestListener(RequestListener listener){
         requestListeners.remove(listener);
     }
+    */
 
     public RoutingTable getRoutingTable(){
+        System.out.println(routingTable.getConsensusExternalAddress().getHostAddress());
         return routingTable;
     }
 
@@ -133,10 +139,11 @@ public class RPCServer {
 
         switch(d.getType()){
             case REQ_MSG: {
+                    /*
                     if(requestListeners.isEmpty()){
                         return;
                     }
-
+                    */
                     MessageBase m = d.decodeRequest();
                     if(m == null){ // DONT DO THIS CHECK LATER ON...
                         return;
@@ -144,9 +151,11 @@ public class RPCServer {
 
                     m.setOrigin(packet.getAddress(), packet.getPort());
 
+                    /*
                     for(RequestListener listener : requestListeners){
                         listener.onRequest(m);
                     }
+                    */
                 }
                 break;
 
@@ -172,7 +181,7 @@ public class RPCServer {
                         routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
                     }
 
-                    call.getMessageCallback().onResponse(call.getMessage(), m);
+                    call.getMessageCallback().onResponse(m);
                 }
                 break;
         }
@@ -322,8 +331,10 @@ public class RPCServer {
         return tid;
     }
 
+    /*
     public interface RequestListener {
 
         void onRequest(MessageBase message);
     }
+    */
 }

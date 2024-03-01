@@ -6,6 +6,6 @@ import unet.kad3.kad.dht.inter.DHT;
 public class KDHT extends DHT {
 
     public KDHT(RPCServer server){
-        super(server);
+        //super(server);
     }
 }

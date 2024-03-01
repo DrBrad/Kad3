@@ -18,13 +18,13 @@ import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
 
-public class DHT implements RPCServer.RequestListener {
+public class DHT /*implements RPCServer.RequestListener*/ {
 
     //DONT DO DHT AS SEPERATE CLASS CHANGE THIS...
 
     //public static final int THREAD_POOL_SIZE = 3;
     private RPCServer server;
-
+/*
     public DHT(RPCServer server){
         this.server = server;
         //WE CAN START BY ATTEMPTING UPnP TO GET EXTERNAL IP OTHERWISE CONSENSUS IS NEEDED...
@@ -50,7 +50,7 @@ public class DHT implements RPCServer.RequestListener {
                             server.getRoutingTable().insert(n);
                         }
                     });
-                    */
+                    *./
                     //System.out.println(n);
                 }
 
@@ -76,5 +76,5 @@ public class DHT implements RPCServer.RequestListener {
 
     @Override
     public void onRequest(MessageBase message){
-    }
+    }*/
 }

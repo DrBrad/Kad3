@@ -1,7 +1,6 @@
 package unet.kad3.kad.utils;
 
-import unet.kad3.kad.utils.refresh.BucketRefresh;
-import unet.kad3.kad.utils.refresh.inter.RefreshOperation;
+import unet.kad3.kad.utils.inter.Operation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,8 +11,8 @@ public class RefreshHandler {
 
     private Timer refreshTimer;
     private TimerTask refreshTimerTask;
-    private List<RefreshOperation> operations;
-    private long refreshTime = 3600000;
+    private List<Operation> operations;
+    private long refreshTime = 30000;//3600000;
 
     public RefreshHandler(){
         operations = new ArrayList<>();
@@ -24,13 +23,18 @@ public class RefreshHandler {
     }
 
     public void start(){
+        if(isRunning()){
+            throw new IllegalArgumentException("Refresh has already started.");
+        }
+
         if(refreshTimer == null && refreshTimerTask == null){
+            System.out.println("REFRESH STARTED");
             refreshTimer = new Timer(true);
             refreshTimerTask = new TimerTask(){
                 @Override
                 public void run(){
                     System.out.println("STARTING REFRESH");
-                    for(RefreshOperation operation : operations){
+                    for(Operation operation : operations){
                         operation.run();
                     }
 
@@ -107,19 +111,19 @@ public class RefreshHandler {
         refreshTime = time;
     }
 
-    public void addOperation(RefreshOperation operation){
+    public void addOperation(Operation operation){
         operations.add(operation);
     }
 
-    public boolean removeOperation(RefreshOperation operation){
+    public boolean removeOperation(Operation operation){
         return operations.remove(operation);
     }
 
-    public RefreshOperation getOperation(int i){
+    public Operation getOperation(int i){
         return operations.get(i);
     }
 
-    public boolean containsOperation(RefreshOperation operation){
+    public boolean containsOperation(Operation operation){
         return operations.contains(operation);
     }
 }
