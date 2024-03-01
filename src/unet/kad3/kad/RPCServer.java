@@ -2,6 +2,7 @@ package unet.kad3.kad;
 
 import unet.kad3.kad.calls.RPCRequestCall;
 import unet.kad3.kad.calls.inter.RPCCall;
+import unet.kad3.kad.utils.RPCHandler;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;
 import unet.kad3.routing.inter.RoutingTable;
@@ -11,11 +12,14 @@ import unet.kad3.utils.net.AddressUtils;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
+import java.net.InetAddress;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -27,17 +31,26 @@ public class RPCServer {
     private final ConcurrentLinkedQueue<DatagramPacket> receivePool;
     private final ConcurrentLinkedQueue<RPCCall> sendPool;
 
-    private final ConcurrentHashMap<ByteWrapper, RPCRequestCall> calls;
-    private final List<RequestListener> requestListeners;
-    private final RoutingTable routingTable;
+    //private final ConcurrentHashMap<ByteWrapper, RPCRequestCall> calls;
+    private final LinkedHashMap<ByteWrapper, RPCRequestCall> calls  = new LinkedHashMap<>(512, 0.75f, true){
+        @Override
+        protected boolean removeEldestEntry(Map.Entry<ByteWrapper, RPCRequestCall> eldest){
+            return (size() > 512);
+        }
+    };
 
-    public RPCServer(RoutingTable routingTable){
+    //private final List<RequestListener> requestListeners;
+    private final RoutingTable routingTable;
+    private final RPCHandler handler;
+
+    public RPCServer(RoutingTable routingTable, RPCHandler handler){
         this.routingTable = routingTable;
+        this.handler = handler;
         //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
         sendPool = new ConcurrentLinkedQueue<>();
-        calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
-        requestListeners = new ArrayList<>();
+        //calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
+        //requestListeners = new ArrayList<>();
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
     }
@@ -81,7 +94,7 @@ public class RPCServer {
                         send(sendPool.poll());
                     }
 
-                    removeStalled();
+                    //removeStalled();
                 }
             }
         }).start();
@@ -99,6 +112,7 @@ public class RPCServer {
         return (server != null) ? server.getLocalPort() : 0;
     }
 
+    /*
     public void addRequestListener(RequestListener listener){
         requestListeners.add(listener);
     }
@@ -106,6 +120,7 @@ public class RPCServer {
     public void removeRequestListener(RequestListener listener){
         requestListeners.remove(listener);
     }
+    */
 
     public RoutingTable getRoutingTable(){
         return routingTable;
@@ -124,8 +139,8 @@ public class RPCServer {
         MessageDecoder d = new MessageDecoder(packet.getData());
 
         switch(d.getType()){
-            case REQ_MSG:
-                if(!requestListeners.isEmpty()){
+            case REQ_MSG: {
+                //if(!requestListeners.isEmpty()){
                     MessageBase m = d.decodeRequest();
                     if(m == null){ // DONT DO THIS CHECK LATER ON...
                         return;
@@ -133,35 +148,38 @@ public class RPCServer {
 
                     m.setOrigin(packet.getAddress(), packet.getPort());
 
-                    for(RequestListener listener : requestListeners){
-                        listener.onRequest(m);
-                    }
+                    handler.receive(m);
+
+                    //for(RequestListener listener : requestListeners){
+                    //    listener.onRequest(m);
+                    //}
                 }
                 break;
 
-            case RSP_MSG:
-                ByteWrapper tid = new ByteWrapper(d.getTransactionID());
+            case RSP_MSG: {
+                    ByteWrapper tid = new ByteWrapper(d.getTransactionID());
 
-                if(!calls.containsKey(tid)){
-                    return;
+                    if(!calls.containsKey(tid)){
+                        return;
+                    }
+
+                    RPCRequestCall call = calls.get(tid);
+                    calls.remove(tid);
+                    MessageBase m = d.decodeResponse(call.getMessage().getMethod());
+                    m.setOrigin(packet.getAddress(), packet.getPort());
+
+                    //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
+                    if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
+                            packet.getPort() != call.getMessage().getDestinationPort()){
+                        return;
+                    }
+
+                    if(m.getPublic() != null){
+                        routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
+                    }
+
+                    call.getMessageCallback().onResponse(call.getMessage(), m);
                 }
-
-                RPCRequestCall call = calls.get(tid);
-                calls.remove(tid);
-                MessageBase m = d.decodeResponse(call.getMessage().getMethod());
-                m.setOrigin(packet.getAddress(), packet.getPort());
-
-                //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
-                if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
-                        packet.getPort() != call.getMessage().getDestinationPort()){
-                    return;
-                }
-
-                if(m.getPublic() != null){
-                    routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
-                }
-
-                call.getMessageCallback().onResponse(call.getMessage(), m);
                 break;
         }
         /*
@@ -201,6 +219,7 @@ public class RPCServer {
         }
     }
 
+    /*
     private void removeStalled(){
         long now = System.currentTimeMillis();
         for(ByteWrapper tid : calls.keySet()){
@@ -214,6 +233,7 @@ public class RPCServer {
             //call.getMessageCallback().onResponse(call.getMessage());
         }
     }
+    */
 
     public void sendMessage(RPCCall call){
         if(call.getMessage().getDestination() == null){

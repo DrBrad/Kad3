@@ -45,7 +45,7 @@ public class Main {
 
             while(true){
                 Thread.sleep(10000);
-                System.out.println(k.getDHT().getUID());
+                //System.out.println(k.getDHT().getUID());
             }
 
             //UID uid = k.getDHT().getUID();

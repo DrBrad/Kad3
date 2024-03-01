@@ -1,13 +1,13 @@
 package unet.kad3.kad;
 
-import unet.kad3.kad.dht.KDHT;
-import unet.kad3.kad.dht.inter.DHT;
+import unet.kad3.kad.utils.RefreshHandler;
+import unet.kad3.kad.utils.refresh.BucketRefresh;
+import unet.kad3.kad.utils.refresh.StaleRefresh;
+import unet.kad3.kad.utils.refresh.inter.RefreshOperation;
 import unet.kad3.routing.BucketTypes;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;
 
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.SocketException;
@@ -15,7 +15,8 @@ import java.net.SocketException;
 public class Kademlia {
 
     private RPCServer server;
-    private DHT dht;
+    private RefreshHandler refresh;
+    //private DHT dht;
 
     //ALLOW DHT SPECIFICATION
 
@@ -36,6 +37,9 @@ public class Kademlia {
     public Kademlia(RoutingTable routingTable){
         System.out.println("Starting with bucket type: "+routingTable.getClass().getSimpleName());
         server = new RPCServer(routingTable);
+        refresh = new RefreshHandler();
+        refresh.addOperation(new BucketRefresh(server));
+        refresh.addOperation(new StaleRefresh(server));
         //dht = new KDHT(server);
     }
 
@@ -49,7 +53,7 @@ public class Kademlia {
 
     public void join(int localPort, InetSocketAddress address)throws SocketException {
         bind(localPort);
-        dht.join(address);
+        //dht.join(address);
     }
 
     public void bind()throws SocketException {
@@ -61,14 +65,25 @@ public class Kademlia {
             server.start(port);
         }
 
+        if(!refresh.isRunning()){
+            refresh.start();
+        }
+
+        /*
         if(dht != null){
             dht.start();
             return;
         }
         dht = new KDHT(server);
         dht.start();
+        */
     }
 
+    public RefreshHandler getRefreshHandler(){
+        return refresh;
+    }
+
+    /*
     public void setDHT(Class<?> c){
         if(DHT.class.isAssignableFrom(c)){
             try{
@@ -89,11 +104,15 @@ public class Kademlia {
     public DHT getDHT(){
         return dht;
     }
+    */
 
     public void stop(){
         server.stop();
+        refresh.stop();
+        /*
         if(dht != null){
             dht.stop();
         }
+        */
     }
 }

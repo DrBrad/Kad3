@@ -148,7 +148,7 @@ public class MessageBase {
         return getBencode().encode();
     }
 
-    public static enum Method {
+    public enum Method {
 
         PING,
         FIND_NODE,
