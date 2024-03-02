@@ -146,6 +146,8 @@ public class RPCServer {
             return;
         }
 
+        //SPAM THROTTLE...
+
         try{
             MessageDecoder d = new MessageDecoder(packet.getData());
 
@@ -164,6 +166,7 @@ public class RPCServer {
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
                         routingTable.insert(new Node(m.getUID(), m.getOrigin()));
+                        System.out.println("SEEN RQ: "+new Node(m.getUID(), m.getOrigin()));
 
                         receiver.onRequest(m);
                         /*

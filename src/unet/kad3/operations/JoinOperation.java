@@ -46,7 +46,7 @@ public class JoinOperation implements Operation {
                 }
                 */
 
-                //new PingOperation(server, r.getAllNodes()).run();
+                new PingOperation(server, r.getAllNodes()).run();
 
                 if(!refresh.isRunning()){
                     refresh.start();

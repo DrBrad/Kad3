@@ -22,8 +22,12 @@ public class PingOperation implements Operation {
 
     @Override
     public void run(){
-        //long now = System.currentTimeMillis();
+        long now = System.currentTimeMillis();
         for(Node n : nodes){
+            if(!n.hasQueried(now)){
+                System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
+                continue;
+            }
             //if(n.hasQueried(now) && n.getStale() == 0){
             //    System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
             //    continue;
