@@ -71,6 +71,14 @@ public class KRoutingTable extends RoutingTable {
                 if(consensusExternalAddress != k.get(res)){
                     consensusExternalAddress = k.get(res);
                     deriveUID();
+
+                    if(listeners.isEmpty()){
+                        return;
+                    }
+
+                    for(UIDChangeListener listener : listeners){
+                        listener.onChange(getDerivedUID());
+                    }
                 }
 
                 //consensusExternalAddress = k.get(res);

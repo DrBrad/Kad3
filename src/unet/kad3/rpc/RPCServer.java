@@ -1,11 +1,14 @@
 package unet.kad3.rpc;
 
+import unet.kad3.operations.refresh.BucketRefresh;
+import unet.kad3.operations.refresh.StaleRefresh;
 import unet.kad3.rpc.calls.RPCRequestCall;
 import unet.kad3.rpc.calls.inter.RPCCall;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.ByteWrapper;
+import unet.kad3.utils.UID;
 import unet.kad3.utils.net.AddressUtils;
 
 import java.io.IOException;
@@ -47,6 +50,14 @@ public class RPCServer {
         //requestListeners = new ArrayList<>();
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
+
+        routingTable.addUIDChangeListener(new RoutingTable.UIDChangeListener(){
+            @Override
+            public void onChange(UID uid){
+                new BucketRefresh(RPCServer.this).run();
+                new StaleRefresh(RPCServer.this).run();
+            }
+        });
     }
 
     public void start(int port)throws SocketException {
@@ -122,7 +133,7 @@ public class RPCServer {
     */
 
     public RoutingTable getRoutingTable(){
-        System.out.println(routingTable.getConsensusExternalAddress().getHostAddress());
+        System.out.println(routingTable.getConsensusExternalAddress().getHostAddress()+"  "+routingTable.getAllNodes().size());
         return routingTable;
     }
 

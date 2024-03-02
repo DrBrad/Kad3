@@ -4,11 +4,17 @@ import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class RoutingTable {
 
     protected UID uid;
+    protected List<UIDChangeListener> listeners;
+
+    public RoutingTable(){
+        listeners = new ArrayList<>();
+    }
 
     public abstract void updatePublicIPConsensus(InetAddress source, InetAddress addr);
 
@@ -20,6 +26,14 @@ public abstract class RoutingTable {
 
     public UID getDerivedUID(){
         return uid;
+    }
+
+    public void addUIDChangeListener(UIDChangeListener listener){
+        listeners.add(listener);
+    }
+
+    public boolean removeUIDChangeListener(UIDChangeListener listener){
+        return listeners.remove(listener);
     }
 
     /*
@@ -42,4 +56,8 @@ public abstract class RoutingTable {
 
     public abstract List<Node> getAllUnqueriedNodes();
 
+    public interface UIDChangeListener {
+
+        void onChange(UID uid);
+    }
 }
