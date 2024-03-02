@@ -18,7 +18,7 @@ public class Node {
     //protected int port;
 
     private int stale;
-    private long lastSeen;
+    private long lastSeen = Long.MIN_VALUE;
 
     //FOR TESTING PURPOSES ONLY...
 
@@ -148,7 +148,7 @@ public class Node {
     }
 
     public boolean hasQueried(long now){
-        return (lastSeen+QUERY_TIME < now);
+        return (now-lastSeen < QUERY_TIME);
     }
 
     public boolean verify(Object o){

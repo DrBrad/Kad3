@@ -95,6 +95,10 @@ public class Kademlia {
         return server.getRoutingTable().getDerivedUID();
     }
 
+    public InetAddress getConsensusAddress(){
+        return server.getRoutingTable().getConsensusExternalAddress();
+    }
+
     /*
     public void setDHT(Class<?> c){
         if(DHT.class.isAssignableFrom(c)){

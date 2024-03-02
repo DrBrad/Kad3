@@ -34,7 +34,7 @@ public class Main {
     //START COUNTING MESSAGES RECEIVED SO THAT WE CAN DETERMINE IF WE ARE FAILING WITH ROUTING TABLE CONSENSUS IP
     //THE IP TAKES LIKE 10 REFRESHES TO GET IP - LIKELY THE ASYNC RESPONSE IS THROWING THIS UPDATE OFF
 
-    //DO A REFRESH AFTER CONSENSUS IP HAS BEEN CHANGED
+    //TRY NOT TO QUERY A NODE MORE THAN 2 TIMES WITH SAME REQUEST
 
     public static void main(String[] args){
         try{
@@ -45,7 +45,7 @@ public class Main {
 
             while(true){
                 Thread.sleep(10000);
-                System.out.println(k.getUID());
+                System.out.println("CONSENSUS: "+k.getUID()+"  "+k.getConsensusAddress().getHostAddress());
             }
 
             //UID uid = k.getDHT().getUID();

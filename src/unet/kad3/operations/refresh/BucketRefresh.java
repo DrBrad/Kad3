@@ -12,18 +12,23 @@ import unet.kad3.routing.kb.KBucket;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class BucketRefresh implements Operation {
 
     private RPCServer server;
+    //private List<Node> queries;
 
     public BucketRefresh(RPCServer server){
         this.server = server;
+        //queries = new ArrayList<>();
     }
 
     @Override
     public void run(){
+        List<Node> queries = new ArrayList<>();
+
         for(int i = 1; i < UID.ID_LENGTH; i++){
             if(server.getRoutingTable().getBucketSize(i) < KBucket.MAX_BUCKET_SIZE){ //IF THE BUCKET IS FULL WHY SEARCH... WE CAN REFILL BY OTHER PEER PINGS AND LOOKUPS...
                 final UID k = server.getRoutingTable().getDerivedUID().generateNodeIdByDistance(i);
@@ -42,11 +47,21 @@ public class BucketRefresh implements Operation {
                                 n.setSeen();
                                 FindNodeResponse r = (FindNodeResponse) message;
 
-                                for(Node n : r.getAllNodes()){
-                                    server.getRoutingTable().insert(n);
+                                List<Node> nodes = r.getAllNodes();
+                                for(int i = nodes.size()-1; i > -1; i--){
+                                    if(queries.contains(nodes.get(i))){
+                                        nodes.remove(nodes.get(i));
+                                    }
                                 }
 
-                                new PingOperation(server, r.getAllNodes()).run();
+                                queries.addAll(nodes);
+
+
+
+                                //for(Node n : r.getAllNodes()){
+                                //    server.getRoutingTable().insert(n);
+                                //}
+
                             }
                         });
                         server.send(call);
@@ -54,5 +69,7 @@ public class BucketRefresh implements Operation {
                 }
             }
         }
+
+        new PingOperation(server, queries).run();
     }
 }

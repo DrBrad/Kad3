@@ -22,7 +22,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 
 public class RPCServer {
 
-    public static final int MAX_ACTIVE_CALLS = 20, TID_LENGTH = 6;
+    public static final int MAX_ACTIVE_CALLS = 512, TID_LENGTH = 6;
 
     private DatagramSocket server;
     private final ConcurrentLinkedQueue<DatagramPacket> receivePool;
@@ -55,7 +55,9 @@ public class RPCServer {
             @Override
             public void onRestart(){
                 new BucketRefresh(RPCServer.this).run();
-                new StaleRefresh(RPCServer.this).run();
+
+                //ONLY DO THIS IF WE ARE INCLUDING CACHE
+                //new StaleRefresh(RPCServer.this).run();
             }
         });
     }
@@ -133,7 +135,7 @@ public class RPCServer {
     */
 
     public RoutingTable getRoutingTable(){
-        System.out.println(routingTable.getConsensusExternalAddress().getHostAddress()+"  "+routingTable.getAllNodes().size());
+        //System.out.println(routingTable.getConsensusExternalAddress().getHostAddress()+"  "+routingTable.getAllNodes().size());
         return routingTable;
     }
 

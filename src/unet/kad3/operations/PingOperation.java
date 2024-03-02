@@ -22,7 +22,13 @@ public class PingOperation implements Operation {
 
     @Override
     public void run(){
+        long now = System.currentTimeMillis();
         for(Node n : nodes){
+            if(!n.hasQueried(now)){
+                System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
+                continue;
+            }
+
             PingRequest request = new PingRequest();
             request.setDestination(n.getAddress());
 
@@ -30,7 +36,8 @@ public class PingOperation implements Operation {
             call.setMessageCallback(new MessageCallback(){
                 @Override
                 public void onResponse(MessageBase message){
-                    n.setSeen();
+                    server.getRoutingTable().insert(n);
+                    System.out.println("SEEN "+n.getAddress().getHostName());
                 }
             });
             server.send(call);

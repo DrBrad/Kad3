@@ -36,9 +36,9 @@ public class JoinOperation implements Operation {
             public void onResponse(MessageBase message){
                 FindNodeResponse r = (FindNodeResponse) message;
 
-                for(Node n : r.getAllNodes()){
-                    server.getRoutingTable().insert(n);
-                }
+                //for(Node n : r.getAllNodes()){
+                //    server.getRoutingTable().insert(n);
+                //}
 
                 new PingOperation(server, r.getAllNodes()).run();
 
