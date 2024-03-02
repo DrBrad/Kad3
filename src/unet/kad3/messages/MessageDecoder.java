@@ -43,7 +43,13 @@ public class MessageDecoder {
 
     public MessageDecoder(byte[] b){
         ben = new BencodeObject(b);
+        if(!ben.containsKey("t")){
+            throw new IllegalArgumentException("Transaction ID was not set.");
+        }
         tid = ben.getBytes("t");
+        if(!ben.containsKey("y")){
+            throw new IllegalArgumentException("Message type was not set.");
+        }
         type = MessageBase.Type.fromRPCTypeName(ben.getString("y"));
     }
 

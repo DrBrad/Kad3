@@ -1,6 +1,6 @@
-package unet.kad3.kad.utils;
+package unet.kad3.rpc;
 
-import unet.kad3.kad.utils.inter.Operation;
+import unet.kad3.operations.inter.Operation;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +19,7 @@ public class RefreshHandler {
     }
 
     public boolean isRunning(){
-        return (refreshTimer == null && refreshTimerTask == null);
+        return (refreshTimer != null || refreshTimerTask != null);
     }
 
     public void start(){

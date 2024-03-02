@@ -1,8 +1,7 @@
-package unet.kad3.kad;
+package unet.kad3.rpc;
 
-import unet.kad3.kad.calls.RPCRequestCall;
-import unet.kad3.kad.calls.inter.RPCCall;
-import unet.kad3.kad.utils.RPCHandler;
+import unet.kad3.rpc.calls.RPCRequestCall;
+import unet.kad3.rpc.calls.inter.RPCCall;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;
 import unet.kad3.routing.inter.RoutingTable;
@@ -12,14 +11,9 @@ import unet.kad3.utils.net.AddressUtils;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
-import java.util.ArrayList;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -41,9 +35,11 @@ public class RPCServer {
 
     //private final List<RequestListener> requestListeners;
     protected final RoutingTable routingTable;
+    protected final RPCReceiver receiver;
 
     public RPCServer(RoutingTable routingTable){
         this.routingTable = routingTable;
+        receiver = new RPCReceiver(this);
         //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
         //sendPool = new ConcurrentLinkedQueue<>();
@@ -94,7 +90,7 @@ public class RPCServer {
                     }
                     */
 
-                    //removeStalled();
+                    removeStalled();
                 }
             }
         }).start();
@@ -130,60 +126,64 @@ public class RPCServer {
         return routingTable;
     }
 
-    public void onReceive(DatagramPacket packet){
+    private void onReceive(DatagramPacket packet){
         if(AddressUtils.isBogon(packet.getAddress(), packet.getPort())){
             return;
         }
 
-        MessageDecoder d = new MessageDecoder(packet.getData());
+        try{
+            MessageDecoder d = new MessageDecoder(packet.getData());
 
-        switch(d.getType()){
-            case REQ_MSG: {
-                    /*
-                    if(requestListeners.isEmpty()){
-                        return;
+            switch(d.getType()){
+                case REQ_MSG: {
+                        /*
+                        if(requestListeners.isEmpty()){
+                            return;
+                        }
+                        */
+                        MessageBase m = d.decodeRequest();
+                        if(m == null){ // DONT DO THIS CHECK LATER ON...
+                            return;
+                        }
+
+                        m.setOrigin(packet.getAddress(), packet.getPort());
+
+                        receiver.onRequest(m);
+                        /*
+                        for(RequestListener listener : requestListeners){
+                            listener.onRequest(m);
+                        }
+                        */
                     }
-                    */
-                    MessageBase m = d.decodeRequest();
-                    if(m == null){ // DONT DO THIS CHECK LATER ON...
-                        return;
+                    break;
+
+                case RSP_MSG: {
+                        ByteWrapper tid = new ByteWrapper(d.getTransactionID());
+
+                        if(!calls.containsKey(tid)){
+                            return;
+                        }
+
+                        RPCRequestCall call = calls.get(tid);
+                        calls.remove(tid);
+                        MessageBase m = d.decodeResponse(call.getMessage().getMethod());
+                        m.setOrigin(packet.getAddress(), packet.getPort());
+
+                        //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
+                        if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
+                                packet.getPort() != call.getMessage().getDestinationPort()){
+                            return;
+                        }
+
+                        if(m.getPublic() != null){
+                            routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
+                        }
+
+                        call.getMessageCallback().onResponse(m);
                     }
-
-                    m.setOrigin(packet.getAddress(), packet.getPort());
-
-                    /*
-                    for(RequestListener listener : requestListeners){
-                        listener.onRequest(m);
-                    }
-                    */
-                }
-                break;
-
-            case RSP_MSG: {
-                    ByteWrapper tid = new ByteWrapper(d.getTransactionID());
-
-                    if(!calls.containsKey(tid)){
-                        return;
-                    }
-
-                    RPCRequestCall call = calls.get(tid);
-                    calls.remove(tid);
-                    MessageBase m = d.decodeResponse(call.getMessage().getMethod());
-                    m.setOrigin(packet.getAddress(), packet.getPort());
-
-                    //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
-                    if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
-                            packet.getPort() != call.getMessage().getDestinationPort()){
-                        return;
-                    }
-
-                    if(m.getPublic() != null){
-                        routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
-                    }
-
-                    call.getMessageCallback().onResponse(m);
-                }
-                break;
+                    break;
+            }
+        }catch(IllegalArgumentException e){
         }
     }
 
@@ -213,101 +213,6 @@ public class RPCServer {
         }
     }
 
-    /*
-    private void receive(DatagramPacket packet){
-        //if(packet.getPort() == 0){
-        //    return;
-        //}
-
-        if(AddressUtils.isBogon(packet.getAddress(), packet.getPort())){
-            return;
-        }
-
-        //try{
-        MessageDecoder d = new MessageDecoder(packet.getData());
-
-        switch(d.getType()){
-            case REQ_MSG:
-                if(!requestListeners.isEmpty()){
-                    MessageBase m = d.decodeRequest();
-                    if(m == null){ // DONT DO THIS CHECK LATER ON...
-                        return;
-                    }
-
-                    m.setOrigin(packet.getAddress(), packet.getPort());
-
-                    //handler.receive(m);
-
-                    for(RequestListener listener : requestListeners){
-                        listener.onRequest(m);
-                    }
-                }
-                break;
-
-            case RSP_MSG:
-                ByteWrapper tid = new ByteWrapper(d.getTransactionID());
-
-                if(!calls.containsKey(tid)){
-                    return;
-                }
-
-                RPCRequestCall call = calls.get(tid);
-                calls.remove(tid);
-                MessageBase m = d.decodeResponse(call.getMessage().getMethod());
-                m.setOrigin(packet.getAddress(), packet.getPort());
-
-                //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
-                if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
-                        packet.getPort() != call.getMessage().getDestinationPort()){
-                    return;
-                }
-
-                if(m.getPublic() != null){
-                    routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
-                }
-
-                call.getMessageCallback().onResponse(call.getMessage(), m);
-                break;
-        }
-        /*
-        }catch (Exception e){
-            e.printStackTrace();
-            System.out.println(new String(packet.getData()));
-        }
-        *./
-    }
-
-    //PROBABLY CHANGE SO THAT WE CAN SET RTT...
-    private void send(RPCCall call){
-        try{
-            call.getMessage().setUID(routingTable.getDerivedUID());
-
-            if(call instanceof RPCRequestCall){
-                byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
-                call.getMessage().setTransactionID(tid);
-                calls.put(new ByteWrapper(tid), (RPCRequestCall) call);
-                ((RPCRequestCall) call).sent();
-            }
-
-            //try{
-            byte[] data = call.getMessage().encode();
-            DatagramPacket packet = new DatagramPacket(data, 0, data.length, call.getMessage().getDestination());
-
-            server.send(packet);
-            /*
-            }catch (Exception e){
-                e.printStackTrace();
-                System.out.println(call.getMessage());
-            }
-            *./
-
-        }catch(IOException | NoSuchAlgorithmException e){
-            e.printStackTrace();
-        }
-    }
-    */
-
-    /*
     private void removeStalled(){
         long now = System.currentTimeMillis();
         for(ByteWrapper tid : calls.keySet()){
@@ -321,7 +226,6 @@ public class RPCServer {
             //call.getMessageCallback().onResponse(call.getMessage());
         }
     }
-    */
 
     //DONT INIT EVERY TIME...
     private byte[] generateTransactionID()throws NoSuchAlgorithmException {

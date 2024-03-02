@@ -1,10 +1,10 @@
-package unet.kad3.kad;
+package unet.kad3;
 
-import unet.kad3.kad.utils.RPCHandler;
-import unet.kad3.kad.utils.RefreshHandler;
-import unet.kad3.kad.utils.operations.JoinOperation;
-import unet.kad3.kad.utils.refresh.BucketRefresh;
-import unet.kad3.kad.utils.refresh.StaleRefresh;
+import unet.kad3.rpc.RPCServer;
+import unet.kad3.rpc.RefreshHandler;
+import unet.kad3.operations.JoinOperation;
+import unet.kad3.operations.refresh.BucketRefresh;
+import unet.kad3.operations.refresh.StaleRefresh;
 import unet.kad3.routing.BucketTypes;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.Node;

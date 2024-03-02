@@ -1,8 +1,8 @@
-package unet.kad3.kad.utils.operations;
+package unet.kad3.operations;
 
-import unet.kad3.kad.RPCServer;
-import unet.kad3.kad.calls.RPCRequestCall;
-import unet.kad3.kad.utils.inter.Operation;
+import unet.kad3.rpc.RPCServer;
+import unet.kad3.rpc.calls.RPCRequestCall;
+import unet.kad3.operations.inter.Operation;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.inter.MessageCallback;

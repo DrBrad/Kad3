@@ -1,10 +1,9 @@
-package unet.kad3.kad.utils.operations;
+package unet.kad3.operations;
 
-import unet.kad3.kad.RPCServer;
-import unet.kad3.kad.calls.RPCRequestCall;
-import unet.kad3.kad.utils.RefreshHandler;
-import unet.kad3.kad.utils.inter.Operation;
-import unet.kad3.kad.utils.refresh.BucketRefresh;
+import unet.kad3.rpc.RPCServer;
+import unet.kad3.rpc.calls.RPCRequestCall;
+import unet.kad3.rpc.RefreshHandler;
+import unet.kad3.operations.inter.Operation;
 import unet.kad3.messages.FindNodeRequest;
 import unet.kad3.messages.FindNodeResponse;
 import unet.kad3.messages.inter.MessageBase;
@@ -41,8 +40,8 @@ public class JoinOperation implements Operation {
                     server.getRoutingTable().insert(n);
                 }
 
-                //new PingOperation(server, r.getAllNodes()).run();
-                //new BucketRefresh(server).run();
+                new PingOperation(server, r.getAllNodes()).run();
+
                 if(!refresh.isRunning()){
                     refresh.start();
                 }

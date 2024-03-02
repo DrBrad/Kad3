@@ -13,7 +13,7 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.util.Arrays;
 
-import static unet.kad3.kad.RPCServer.TID_LENGTH;
+import static unet.kad3.rpc.RPCServer.TID_LENGTH;
 
 public class MessageTest {
 

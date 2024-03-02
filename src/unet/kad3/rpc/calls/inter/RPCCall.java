@@ -1,7 +1,6 @@
-package unet.kad3.kad.calls.inter;
+package unet.kad3.rpc.calls.inter;
 
 import unet.kad3.messages.inter.MessageBase;
-import unet.kad3.messages.inter.MessageCallback;
 
 public class RPCCall {
 

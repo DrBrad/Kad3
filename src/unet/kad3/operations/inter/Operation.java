@@ -1,4 +1,4 @@
-package unet.kad3.kad.utils.inter;
+package unet.kad3.operations.inter;
 
 public interface Operation {
 

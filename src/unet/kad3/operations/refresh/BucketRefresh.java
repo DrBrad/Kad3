@@ -1,9 +1,9 @@
-package unet.kad3.kad.utils.refresh;
+package unet.kad3.operations.refresh;
 
-import unet.kad3.kad.RPCServer;
-import unet.kad3.kad.calls.RPCRequestCall;
-import unet.kad3.kad.utils.inter.Operation;
-import unet.kad3.kad.utils.operations.PingOperation;
+import unet.kad3.rpc.RPCServer;
+import unet.kad3.rpc.calls.RPCRequestCall;
+import unet.kad3.operations.inter.Operation;
+import unet.kad3.operations.PingOperation;
 import unet.kad3.messages.FindNodeRequest;
 import unet.kad3.messages.FindNodeResponse;
 import unet.kad3.messages.inter.MessageBase;
