@@ -27,7 +27,7 @@ public class BucketRefresh implements Operation {
 
     @Override
     public void run(){
-        //List<Node> queries = new ArrayList<>();
+        List<Node> queries = new ArrayList<>();
 
         for(int i = 1; i < UID.ID_LENGTH; i++){
             if(server.getRoutingTable().getBucketSize(i) < KBucket.MAX_BUCKET_SIZE){ //IF THE BUCKET IS FULL WHY SEARCH... WE CAN REFILL BY OTHER PEER PINGS AND LOOKUPS...
@@ -50,7 +50,6 @@ public class BucketRefresh implements Operation {
 
                                 //queries.addAll(r.getAllNodes());
 
-                                /*
                                 List<Node> nodes = r.getAllNodes();
                                 for(int i = nodes.size()-1; i > -1; i--){
                                     if(queries.contains(nodes.get(i))){
@@ -58,6 +57,7 @@ public class BucketRefresh implements Operation {
                                     }
                                 }
 
+                                /*
                                 //queries.addAll(nodes);
                                 for(Node n : r.getAllNodes()){
                                     server.getRoutingTable().insert(n);
@@ -66,6 +66,7 @@ public class BucketRefresh implements Operation {
 
                                 new PingOperation(server, r.getAllNodes()).run();
                                 */
+                                queries.addAll(nodes);
 
                                 new PingOperation(server, r.getAllNodes()).run();
 
