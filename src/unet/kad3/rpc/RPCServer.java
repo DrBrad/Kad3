@@ -54,6 +54,7 @@ public class RPCServer {
         routingTable.addRestartListener(new RoutingTable.RestartListener(){
             @Override
             public void onRestart(){
+                System.out.println("RESTART");
                 new BucketRefresh(RPCServer.this).run();
 
                 //ONLY DO THIS IF WE ARE INCLUDING CACHE

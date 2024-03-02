@@ -12,7 +12,8 @@ public class RefreshHandler {
     private Timer refreshTimer;
     private TimerTask refreshTimerTask;
     private List<Operation> operations;
-    private long refreshTime = 30000;//3600000;
+    //private long refreshTime = 30000;
+    private long refreshTime = 3600000;
 
     public RefreshHandler(){
         operations = new ArrayList<>();

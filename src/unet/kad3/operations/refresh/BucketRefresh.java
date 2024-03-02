@@ -27,7 +27,7 @@ public class BucketRefresh implements Operation {
 
     @Override
     public void run(){
-        List<Node> queries = new ArrayList<>();
+        //List<Node> queries = new ArrayList<>();
 
         for(int i = 1; i < UID.ID_LENGTH; i++){
             if(server.getRoutingTable().getBucketSize(i) < KBucket.MAX_BUCKET_SIZE){ //IF THE BUCKET IS FULL WHY SEARCH... WE CAN REFILL BY OTHER PEER PINGS AND LOOKUPS...
@@ -45,8 +45,12 @@ public class BucketRefresh implements Operation {
                             @Override
                             public void onResponse(MessageBase message){
                                 n.setSeen();
+                                System.out.println("SEEN FN "+message.getOrigin());
                                 FindNodeResponse r = (FindNodeResponse) message;
 
+                                //queries.addAll(r.getAllNodes());
+
+                                /*
                                 List<Node> nodes = r.getAllNodes();
                                 for(int i = nodes.size()-1; i > -1; i--){
                                     if(queries.contains(nodes.get(i))){
@@ -54,13 +58,16 @@ public class BucketRefresh implements Operation {
                                     }
                                 }
 
-                                queries.addAll(nodes);
+                                //queries.addAll(nodes);
+                                for(Node n : r.getAllNodes()){
+                                    server.getRoutingTable().insert(n);
+                                    n.markStale();
+                                }
 
+                                new PingOperation(server, r.getAllNodes()).run();
+                                */
 
-
-                                //for(Node n : r.getAllNodes()){
-                                //    server.getRoutingTable().insert(n);
-                                //}
+                                new PingOperation(server, r.getAllNodes()).run();
 
                             }
                         });
@@ -70,6 +77,8 @@ public class BucketRefresh implements Operation {
             }
         }
 
-        new PingOperation(server, queries).run();
+        //System.out.println("PINGING TOTAL: "+queries.size());
+
+        //new PingOperation(server, queries).run();
     }
 }

@@ -22,12 +22,12 @@ public class PingOperation implements Operation {
 
     @Override
     public void run(){
-        long now = System.currentTimeMillis();
+        //long now = System.currentTimeMillis();
         for(Node n : nodes){
-            if(!n.hasQueried(now)){
-                System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
-                continue;
-            }
+            //if(n.hasQueried(now) && n.getStale() == 0){
+            //    System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
+            //    continue;
+            //}
 
             PingRequest request = new PingRequest();
             request.setDestination(n.getAddress());
@@ -36,7 +36,7 @@ public class PingOperation implements Operation {
             call.setMessageCallback(new MessageCallback(){
                 @Override
                 public void onResponse(MessageBase message){
-                    server.getRoutingTable().insert(n);
+                    //server.getRoutingTable().insert(n);
                     System.out.println("SEEN "+n.getAddress().getHostName());
                 }
             });

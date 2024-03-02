@@ -99,6 +99,10 @@ public class Kademlia {
         return server.getRoutingTable().getConsensusExternalAddress();
     }
 
+    public int getRouterSize(){
+        return server.getRoutingTable().getAllNodes().size();
+    }
+
     /*
     public void setDHT(Class<?> c){
         if(DHT.class.isAssignableFrom(c)){

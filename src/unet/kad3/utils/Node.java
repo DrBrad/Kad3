@@ -18,7 +18,7 @@ public class Node {
     //protected int port;
 
     private int stale;
-    private long lastSeen = Long.MIN_VALUE;
+    private long lastSeen;
 
     //FOR TESTING PURPOSES ONLY...
 

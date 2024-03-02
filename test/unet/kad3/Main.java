@@ -45,7 +45,7 @@ public class Main {
 
             while(true){
                 Thread.sleep(10000);
-                System.out.println("CONSENSUS: "+k.getUID()+"  "+k.getConsensusAddress().getHostAddress());
+                System.out.println("CONSENSUS: "+k.getUID()+"  "+k.getConsensusAddress().getHostAddress()+"  "+k.getRouterSize());
             }
 
             //UID uid = k.getDHT().getUID();
