@@ -68,7 +68,7 @@ public class BucketRefresh implements Operation {
                                 */
                                 queries.addAll(nodes);
 
-                                new PingOperation(server, r.getAllNodes()).run();
+                                new PingOperation(server, nodes).run();
 
                             }
                         });
