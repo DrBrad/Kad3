@@ -80,7 +80,7 @@ public class RoutingTest {
         }
     }
 
-    public static void consensus(RoutingTable r)throws UnknownHostException{
+    public static void consensus(RoutingTable r)throws UnknownHostException {
         InetAddress external = InetAddress.getByName("186.60.165.238");
         r.updatePublicIPConsensus(InetAddress.getByName("124.31.75.21"), external);
         r.updatePublicIPConsensus(InetAddress.getByName("21.75.31.124"), external);
