@@ -61,8 +61,17 @@ public class KBucket {
         return nodes;
     }
 
+    /*
+    public List<Node> getAllNodesIncludingCache(){
+        List<Node> q = new ArrayList<>();
+        q.addAll(this.nodes);
+        q.addAll(cache);
+        return q;
+    }
+    */
+
     public List<Node> getUnQueriedNodes(long now){
-        ArrayList<Node> q = new ArrayList<>();
+        List<Node> q = new ArrayList<>();
         //long now = System.currentTimeMillis();
 
         for(Node n : nodes){

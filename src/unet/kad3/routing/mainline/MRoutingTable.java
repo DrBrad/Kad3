@@ -160,4 +160,9 @@ public class MRoutingTable extends RoutingTable {
     public synchronized List<Node> getAllUnqueriedNodes(){
         return null;
     }
+
+    @Override
+    public void restart(){
+
+    }
 }

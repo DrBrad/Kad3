@@ -71,14 +71,7 @@ public class KRoutingTable extends RoutingTable {
                 if(consensusExternalAddress != k.get(res)){
                     consensusExternalAddress = k.get(res);
                     deriveUID();
-
-                    if(listeners.isEmpty()){
-                        return;
-                    }
-
-                    for(UIDChangeListener listener : listeners){
-                        listener.onChange(getDerivedUID());
-                    }
+                    restart();
                 }
 
                 //consensusExternalAddress = k.get(res);
@@ -333,6 +326,28 @@ public class KRoutingTable extends RoutingTable {
         }
 
         return contacts;
+    }
+
+    @Override
+    public synchronized void restart(){
+        List<Node> nodes = getAllNodes();
+
+        kBuckets = new KBucket[UID.ID_LENGTH];
+        for(int i = 0; i < UID.ID_LENGTH; i++){
+            kBuckets[i] = new KBucket();
+        }
+
+        for(Node node : nodes){
+            insert(node);
+        }
+
+        if(listeners.isEmpty()){
+            return;
+        }
+
+        for(RestartListener listener : listeners){
+            listener.onRestart();
+        }
     }
 
     /*

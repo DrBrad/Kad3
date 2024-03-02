@@ -10,7 +10,7 @@ import java.util.List;
 public abstract class RoutingTable {
 
     protected UID uid;
-    protected List<UIDChangeListener> listeners;
+    protected List<RestartListener> listeners;
 
     public RoutingTable(){
         listeners = new ArrayList<>();
@@ -28,11 +28,11 @@ public abstract class RoutingTable {
         return uid;
     }
 
-    public void addUIDChangeListener(UIDChangeListener listener){
+    public void addRestartListener(RestartListener listener){
         listeners.add(listener);
     }
 
-    public boolean removeUIDChangeListener(UIDChangeListener listener){
+    public boolean removeRestartListener(RestartListener listener){
         return listeners.remove(listener);
     }
 
@@ -56,8 +56,10 @@ public abstract class RoutingTable {
 
     public abstract List<Node> getAllUnqueriedNodes();
 
-    public interface UIDChangeListener {
+    public abstract void restart();
 
-        void onChange(UID uid);
+    public interface RestartListener {
+
+        void onRestart();
     }
 }

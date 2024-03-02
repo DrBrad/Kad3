@@ -51,9 +51,9 @@ public class RPCServer {
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
 
-        routingTable.addUIDChangeListener(new RoutingTable.UIDChangeListener(){
+        routingTable.addRestartListener(new RoutingTable.RestartListener(){
             @Override
-            public void onChange(UID uid){
+            public void onRestart(){
                 new BucketRefresh(RPCServer.this).run();
                 new StaleRefresh(RPCServer.this).run();
             }
