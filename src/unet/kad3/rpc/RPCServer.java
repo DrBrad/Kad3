@@ -8,6 +8,7 @@ import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.ByteWrapper;
+import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 import unet.kad3.utils.net.AddressUtils;
 
@@ -161,6 +162,8 @@ public class RPCServer {
                         }
 
                         m.setOrigin(packet.getAddress(), packet.getPort());
+
+                        routingTable.insert(new Node(m.getUID(), m.getOrigin()));
 
                         receiver.onRequest(m);
                         /*

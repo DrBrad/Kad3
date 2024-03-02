@@ -36,7 +36,7 @@ public class PingOperation implements Operation {
             call.setMessageCallback(new MessageCallback(){
                 @Override
                 public void onResponse(MessageBase message){
-                    //server.getRoutingTable().insert(n);
+                    server.getRoutingTable().insert(n);
                     System.out.println("SEEN "+n.getAddress().getHostName());
                 }
             });
