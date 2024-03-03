@@ -44,6 +44,8 @@ public class Main {
 
     Dht
     UPnP
+
+    Dont auto set LAST SEEN TO - TIME STAMP USE BETTER METHOD...
     */
 
     public static void main(String[] args){
