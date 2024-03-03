@@ -40,8 +40,6 @@ public class Main {
     /*
     Spam throttle
     Blackhole
-    Error messages
-    Stale counter
     Teredo handler
 
     Dht

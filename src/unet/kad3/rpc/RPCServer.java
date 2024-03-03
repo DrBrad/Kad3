@@ -1,5 +1,6 @@
 package unet.kad3.rpc;
 
+import unet.kad3.messages.ErrorMessage;
 import unet.kad3.operations.refresh.BucketRefresh;
 import unet.kad3.operations.refresh.StaleRefresh;
 import unet.kad3.rpc.calls.RPCRequestCall;
@@ -161,7 +162,6 @@ public class RPCServer {
                         routingTable.insert(new Node(m.getUID(), m.getOrigin()));
                         System.out.println("SEEN RQ: "+new Node(m.getUID(), m.getOrigin()));
                     }
-
 
                     receiver.onRequest(m);
                 }
