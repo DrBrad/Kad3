@@ -37,6 +37,17 @@ public class Main {
     //TRY NOT TO QUERY A NODE MORE THAN 2 TIMES WITH SAME REQUEST
     //WORK ON SPAM THROTTLE AND BLACK HOLE
 
+    /*
+    Spam throttle
+    Blackhole
+    Error messages
+    Stale counter
+    Teredo handler
+
+    Dht
+    UPnP
+    */
+
     public static void main(String[] args){
         try{
             Kademlia k = new Kademlia("Kademlia");
