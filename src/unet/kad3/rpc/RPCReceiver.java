@@ -1,9 +1,6 @@
 package unet.kad3.rpc;
 
-import unet.kad3.messages.FindNodeRequest;
-import unet.kad3.messages.FindNodeResponse;
-import unet.kad3.messages.PingRequest;
-import unet.kad3.messages.PingResponse;
+import unet.kad3.messages.*;
 import unet.kad3.routing.kb.KBucket;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.rpc.calls.inter.RPCCall;
@@ -18,6 +15,7 @@ public class RPCReceiver {
 
     public void onRequest(MessageBase message){
         MessageBase response;
+
         switch(message.getMethod()){
             case PING:
                 response = onPing((PingRequest) message);
@@ -28,24 +26,38 @@ public class RPCReceiver {
                 break;
 
             default:
-                return;
+                response = onError(message, ErrorMessage.ErrorType.METHOD);
+                break;
         }
 
         server.send(new RPCCall(response));
     }
 
-    private PingResponse onPing(PingRequest request){
+    private MessageBase onPing(PingRequest request){
         PingResponse response = new PingResponse(request.getTransactionID());
         response.setDestination(request.getOrigin());
         response.setPublic(request.getOrigin());
         return response;
     }
 
-    private FindNodeResponse onFindNode(FindNodeRequest request){
+    private MessageBase onFindNode(FindNodeRequest request){
+        if(request.getTarget() == null){
+            return onError(request, ErrorMessage.ErrorType.PROTOCOL);
+        }
+
         FindNodeResponse response = new FindNodeResponse(request.getTransactionID());
         response.setDestination(request.getOrigin());
         response.setPublic(request.getOrigin());
+
         response.addNodes(server.getRoutingTable().findClosest(request.getTarget(), KBucket.MAX_BUCKET_SIZE));
+        return response;
+    }
+
+    private MessageBase onError(MessageBase request, ErrorMessage.ErrorType type){
+        ErrorMessage response = new ErrorMessage(request.getTransactionID());
+        response.setDestination(request.getOrigin());
+        response.setPublic(request.getOrigin());
+        response.setErrorType(type);
         return response;
     }
 }

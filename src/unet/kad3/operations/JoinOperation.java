@@ -1,5 +1,6 @@
 package unet.kad3.operations;
 
+import unet.kad3.messages.ErrorMessage;
 import unet.kad3.rpc.RPCServer;
 import unet.kad3.rpc.calls.RPCRequestCall;
 import unet.kad3.rpc.RefreshHandler;
@@ -30,29 +31,33 @@ public class JoinOperation implements Operation {
         request.setDestination(address);
         request.setTarget(server.getRoutingTable().getDerivedUID());
 
-        RPCRequestCall call = new RPCRequestCall(request);
-        call.setMessageCallback(new MessageCallback(){
+        server.send(new RPCRequestCall(request, new MessageCallback(){
             @Override
             public void onResponse(MessageBase message){
-                FindNodeResponse r = (FindNodeResponse) message;
+                switch(message.getType()){
+                    case RSP_MSG:
+                        FindNodeResponse r = (FindNodeResponse) message;
 
-                server.getRoutingTable().insert(new Node(r.getUID(), message.getOrigin()));
-                System.out.println("SEEN FN "+message.getOrigin());
+                        server.getRoutingTable().insert(new Node(r.getUID(), message.getOrigin()));
+                        System.out.println("SEEN FN "+message.getOrigin());
 
-                /*
-                for(Node n : r.getAllNodes()){
-                    server.getRoutingTable().insert(n);
-                    n.markStale();
-                }
-                */
+                        new PingOperation(server, r.getAllNodes()).run();
 
-                new PingOperation(server, r.getAllNodes()).run();
+                        if(!refresh.isRunning()){
+                            refresh.start();
+                        }
+                        break;
 
-                if(!refresh.isRunning()){
-                    refresh.start();
+                    case ERR_MSG:
+                        System.err.println("Unable to join node, node sent error message: "+((ErrorMessage) message).getErrorType().getCode()+" - "+((ErrorMessage) message).getErrorType().getDescription());
+                        break;
                 }
             }
-        });
-        server.send(call);
+
+            @Override
+            public void onStalled(){
+                System.err.println("Unable to join node, node never responded.");
+            }
+        }));
     }
 }

@@ -1,5 +1,6 @@
 package unet.kad3.operations.refresh;
 
+import unet.kad3.messages.ErrorMessage;
 import unet.kad3.rpc.RPCServer;
 import unet.kad3.rpc.calls.RPCRequestCall;
 import unet.kad3.operations.inter.Operation;
@@ -40,39 +41,51 @@ public class BucketRefresh implements Operation {
                         request.setDestination(n.getAddress());
                         request.setTarget(k);
 
-                        RPCRequestCall call = new RPCRequestCall(request);
-                        call.setMessageCallback(new MessageCallback(){
+                        server.send(new RPCRequestCall(request, new MessageCallback(){
                             @Override
                             public void onResponse(MessageBase message){
                                 n.setSeen();
-                                System.out.println("SEEN FN "+message.getOrigin());
-                                FindNodeResponse r = (FindNodeResponse) message;
 
-                                //queries.addAll(r.getAllNodes());
+                                switch(message.getType()){
+                                    case RSP_MSG:
+                                        System.out.println("SEEN FN "+message.getOrigin());
+                                        FindNodeResponse r = (FindNodeResponse) message;
 
-                                List<Node> nodes = r.getAllNodes();
-                                for(int i = nodes.size()-1; i > -1; i--){
-                                    if(queries.contains(nodes.get(i))){
-                                        nodes.remove(nodes.get(i));
-                                    }
+                                        //queries.addAll(r.getAllNodes());
+
+                                        List<Node> nodes = r.getAllNodes();
+                                        for(int i = nodes.size()-1; i > -1; i--){
+                                            if(queries.contains(nodes.get(i))){
+                                                nodes.remove(nodes.get(i));
+                                            }
+                                        }
+
+                                        /*
+                                        //queries.addAll(nodes);
+                                        for(Node n : r.getAllNodes()){
+                                            server.getRoutingTable().insert(n);
+                                            n.markStale();
+                                        }
+
+                                        new PingOperation(server, r.getAllNodes()).run();
+                                        */
+                                        queries.addAll(nodes);
+
+                                        new PingOperation(server, nodes).run();
+                                        break;
+
+                                    case ERR_MSG:
+                                        System.err.println("Node sent error message: "+((ErrorMessage) message).getErrorType().getCode()+" - "+((ErrorMessage) message).getErrorType().getDescription());
+                                        break;
                                 }
-
-                                /*
-                                //queries.addAll(nodes);
-                                for(Node n : r.getAllNodes()){
-                                    server.getRoutingTable().insert(n);
-                                    n.markStale();
-                                }
-
-                                new PingOperation(server, r.getAllNodes()).run();
-                                */
-                                queries.addAll(nodes);
-
-                                new PingOperation(server, nodes).run();
-
                             }
-                        });
-                        server.send(call);
+
+                            @Override
+                            public void onStalled(){
+                                n.markStale();
+                                System.err.println("Node stalled: "+n);
+                            }
+                        }));
                     }
                 }
             }

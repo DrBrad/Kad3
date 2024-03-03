@@ -1,0 +1,97 @@
+package unet.kad3.messages;
+
+import unet.kad3.libs.bencode.variables.BencodeArray;
+import unet.kad3.libs.bencode.variables.BencodeObject;
+import unet.kad3.messages.inter.MessageBase;
+
+public class ErrorMessage extends MessageBase {
+
+    private ErrorType e;
+
+    public ErrorMessage(byte[] tid){
+        super(tid, Method.UNKNOWN, Type.ERR_MSG);
+    }
+
+    protected void decode(BencodeArray ben){
+        if(ben.size() < 2){
+            e = ErrorType.PROTOCOL;
+        }
+
+        e = ErrorType.fromCode(ben.getInteger(0));
+    }
+
+    public ErrorType getErrorType(){
+        return e;
+    }
+
+    public void setErrorType(ErrorType e){
+        this.e = e;
+    }
+
+    @Override
+    public BencodeObject getBencode(){
+        BencodeObject ben = super.getBencode();
+        ben.getBencodeArray(t.innerKey()).add(e.getCode());
+        ben.getBencodeArray(t.innerKey()).add(e.getDescription());
+        return ben;
+    }
+
+    public enum ErrorType {
+
+        GENERIC {
+            @Override
+            public int getCode(){
+                return 201;
+            }
+            @Override
+            public String getDescription(){
+                return "Generic Error";
+            }
+        }, SERVER {
+            @Override
+            public int getCode(){
+                return 202;
+            }
+            @Override
+            public String getDescription(){
+                return "Server Error";
+            }
+        }, PROTOCOL {
+            @Override
+            public int getCode(){
+                return 203;
+            }
+            @Override
+            public String getDescription(){
+                return "Protocol Error, such as a malformed packet, invalid arguments, or bad token";
+            }
+        }, METHOD {
+            @Override
+            public int getCode(){
+                return 204;
+            }
+            @Override
+            public String getDescription(){
+                return "Method Unknown";
+            }
+        }, INVALID;
+
+        public int getCode(){
+            return 0;
+        }
+
+        public String getDescription(){
+            return name();
+        }
+
+        public static ErrorType fromCode(int code){
+            for(ErrorType e : values()){
+                if(code == e.getCode()){
+                    return e;
+                }
+            }
+
+            throw new IllegalArgumentException("Error type not found.");
+        }
+    }
+}

@@ -36,15 +36,19 @@ public class PingOperation implements Operation {
             PingRequest request = new PingRequest();
             request.setDestination(n.getAddress());
 
-            RPCRequestCall call = new RPCRequestCall(request);
-            call.setMessageCallback(new MessageCallback(){
+            server.send(new RPCRequestCall(request, new MessageCallback(){
                 @Override
                 public void onResponse(MessageBase message){
                     server.getRoutingTable().insert(n);
                     System.out.println("SEEN "+n.getAddress().getHostName());
                 }
-            });
-            server.send(call);
+
+                @Override
+                public void onStalled(){
+                    n.markStale();
+                    System.err.println("Node stalled: "+n);
+                }
+            }));
         }
     }
 }

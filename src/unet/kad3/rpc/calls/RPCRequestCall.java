@@ -14,6 +14,11 @@ public class RPCRequestCall extends RPCCall {
         super(message);
     }
 
+    public RPCRequestCall(MessageBase message, MessageCallback callback){
+        super(message);
+        this.callback = callback;
+    }
+
     public void setMessageCallback(MessageCallback callback){
         this.callback = callback;
     }

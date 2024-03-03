@@ -1,6 +1,9 @@
 package unet.kad3.messages.inter;
 
-public interface MessageCallback {
+public abstract class MessageCallback {
 
-    void onResponse(MessageBase message);
+    public abstract void onResponse(MessageBase message);
+
+    public void onStalled(){
+    }
 }

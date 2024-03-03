@@ -61,7 +61,7 @@ public class FindNodeRequest extends MessageBase {
     public BencodeObject getBencode(){
         //BencodeObject ben = super.getBencode();
         BencodeObject ben = super.getBencode();
-        ben.getBencodeObject("a").put("target", target.getBytes());
+        ben.getBencodeObject(t.innerKey()).put("target", target.getBytes());
 
         /*
         if(ipv4 || ipv6){

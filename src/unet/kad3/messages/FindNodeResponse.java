@@ -183,11 +183,11 @@ public class FindNodeResponse extends MessageBase {
         BencodeObject ben = super.getBencode();
 
         if(!ipv4Nodes.isEmpty()){
-            ben.getBencodeObject("r").put("nodes", encodeNodes(Types.IPv4));
+            ben.getBencodeObject(t.innerKey()).put("nodes", encodeNodes(Types.IPv4));
         }
 
         if(!ipv6Nodes.isEmpty()){
-            ben.getBencodeObject("r").put("nodes6", encodeNodes(Types.IPv6));
+            ben.getBencodeObject(t.innerKey()).put("nodes6", encodeNodes(Types.IPv6));
         }
 
         return ben;

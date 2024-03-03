@@ -1,5 +1,6 @@
 package unet.kad3.messages.inter;
 
+import unet.kad3.libs.bencode.variables.BencodeArray;
 import unet.kad3.libs.bencode.variables.BencodeObject;
 import unet.kad3.utils.net.AddressUtils;
 import unet.kad3.utils.UID;
@@ -35,19 +36,28 @@ public class MessageBase {
         ben.put("t", tid); //TRANSACTION ID
         ben.put("v", VERSION_CODE); //VERSION
 
-        ben.put(Type.TYPE_KEY, getType().getRPCTypeName());
+        ben.put(Type.TYPE_KEY, t.getRPCTypeName());
 
         switch(t){
             case REQ_MSG:
                 ben.put(t.getRPCTypeName(), m.getRPCName());
-                ben.put("a", new BencodeObject());
-                ben.getBencodeObject("a").put("id", uid.getBytes());
+                ben.put(t.innerKey(), new BencodeObject());
+                ben.getBencodeObject(t.innerKey()).put("id", uid.getBytes());
                 break;
 
             case RSP_MSG:
-                ben.put("r", new BencodeObject());
-                ben.getBencodeObject("r").put("id", uid.getBytes());
+                ben.put(t.innerKey(), new BencodeObject());
+                ben.getBencodeObject(t.innerKey()).put("id", uid.getBytes());
 
+                if(publicAddress != null){
+                    ben.put("ip", AddressUtils.packAddress(publicAddress)); //PACK MY IP ADDRESS
+                }
+                break;
+
+            case ERR_MSG:
+                ben.put(t.innerKey(), new BencodeArray());
+
+                //NOT SURE IF WE PASS IP...
                 if(publicAddress != null){
                     ben.put("ip", AddressUtils.packAddress(publicAddress)); //PACK MY IP ADDRESS
                 }
@@ -172,38 +182,38 @@ public class MessageBase {
 
         REQ_MSG {
             @Override
-            String innerKey(){
+            public String innerKey(){
                 return "a";
             }
             @Override
-            String getRPCTypeName(){
+            public String getRPCTypeName(){
                 return "q";
             }
         }, RSP_MSG {
             @Override
-            String innerKey(){
+            public String innerKey(){
                 return "r";
             }
             @Override
-            String getRPCTypeName(){
+            public String getRPCTypeName(){
                 return "r";
             }
         }, ERR_MSG {
             @Override
-            String innerKey(){
+            public String innerKey(){
                 return "e";
             }
             @Override
-            String getRPCTypeName(){
+            public String getRPCTypeName(){
                 return "e";
             }
         }, INVALID;
 
-        String innerKey(){
+        public String innerKey(){
             return null;
         }
 
-        String getRPCTypeName(){
+        public String getRPCTypeName(){
             return name().toLowerCase();
             //return null;
         }
@@ -211,13 +221,13 @@ public class MessageBase {
         public static Type fromRPCTypeName(String key){
             key = key.toLowerCase();
 
-            for(Type t : Type.values()){
+            for(Type t : values()){
                 if(key.equals(t.getRPCTypeName())){
                     return t;
                 }
             }
 
-            throw new IllegalArgumentException("Inner key not found.");
+            return INVALID;
         }
 
         public static final String TYPE_KEY = "y";

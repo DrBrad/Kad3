@@ -43,14 +43,11 @@ public class MessageDecoder {
 
     public MessageDecoder(byte[] b){
         ben = new BencodeObject(b);
-        if(!ben.containsKey("t")){
-            throw new IllegalArgumentException("Transaction ID was not set.");
+        if(!ben.containsKey("t") || !ben.containsKey(MessageBase.Type.TYPE_KEY)){
+            type = MessageBase.Type.INVALID;
         }
         tid = ben.getBytes("t");
-        if(!ben.containsKey("y")){
-            throw new IllegalArgumentException("Message type was not set.");
-        }
-        type = MessageBase.Type.fromRPCTypeName(ben.getString("y"));
+        type = MessageBase.Type.fromRPCTypeName(ben.getString(MessageBase.Type.TYPE_KEY));
     }
 
     public byte[] getTransactionID(){
@@ -63,7 +60,12 @@ public class MessageDecoder {
 
     public MessageBase decodeRequest(){
         MessageBase message;
-        MessageBase.Method m = MessageBase.Method.fromRPCName(ben.getString("q"));
+
+        //if(!ben.containsKey(type.getRPCTypeName()) && !ben.containsKey("id")){
+        //    return new MessageBase(tid, MessageBase.Method.UNKNOWN, MessageBase.Type.INVALID);
+        //}
+
+        MessageBase.Method m = MessageBase.Method.fromRPCName(ben.getString(type.getRPCTypeName()));
 
         switch(m){
             case PING:
@@ -72,15 +74,14 @@ public class MessageDecoder {
 
             case FIND_NODE:
                 message = new FindNodeRequest(tid);
-                ((FindNodeRequest) message).decode(ben.getBencodeObject("a"));
+                ((FindNodeRequest) message).decode(ben.getBencodeObject(type.innerKey()));
                 break;
 
-            case UNKNOWN:
             default:
-                return null; //UNKNOWN
+                return new MessageBase(tid, MessageBase.Method.UNKNOWN, MessageBase.Type.INVALID); //UNKNOWN
         }
 
-        message.setUID(new UID(ben.getBencodeObject("a").getBytes("id")));
+        message.setUID(new UID(ben.getBencodeObject(type.innerKey()).getBytes("id")));
         //message.setVersion(ben.getDouble("v"));
 
         return message;
@@ -89,6 +90,11 @@ public class MessageDecoder {
     public MessageBase decodeResponse(MessageBase.Method method){
         MessageBase message;
 
+        //if(!ben.containsKey("id")){
+        //    return new MessageBase(tid, method, MessageBase.Type.INVALID);
+        //}
+
+        //try{
         switch(method){
             case PING:
                 message = new PingResponse(tid);
@@ -96,24 +102,36 @@ public class MessageDecoder {
 
             case FIND_NODE:
                 message = new FindNodeResponse(tid);
-                ((FindNodeResponse) message).decode(ben.getBencodeObject("r"));
+                ((FindNodeResponse) message).decode(ben.getBencodeObject(type.innerKey()));
                 break;
 
             case GET:
 
             case PUT:
 
-            case UNKNOWN:
             default:
-                return null; //UNKNOWN
+                return new MessageBase(tid, method, MessageBase.Type.INVALID);
         }
 
-        message.setUID(new UID(ben.getBencodeObject("r").getBytes("id")));
+        message.setUID(new UID(ben.getBencodeObject(type.innerKey()).getBytes("id")));
         if(ben.containsKey("ip")){
             message.setPublic(AddressUtils.unpackAddress(ben.getBytes("ip")));
         }
         //message.setVersion(ben.getDouble("v"));
+        //}catch(){
+        //    message = new ErrorMessage(tid);
+        //}
 
+        return message;
+    }
+
+    public MessageBase decodeError(){
+        ErrorMessage message = new ErrorMessage(tid);
+        message.decode(ben.getBencodeArray(type.innerKey()));
+
+        if(ben.containsKey("ip")){
+            message.setPublic(AddressUtils.unpackAddress(ben.getBytes("ip")));
+        }
         return message;
     }
 }
