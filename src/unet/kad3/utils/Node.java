@@ -18,7 +18,8 @@ public class Node {
     //protected int port;
 
     private int stale;
-    private long lastSeen = Long.MIN_VALUE;
+    private long lastSeen;
+    private boolean queried = false;
 
     //FOR TESTING PURPOSES ONLY...
 
@@ -131,6 +132,7 @@ public class Node {
 
     //DETAILS
     public void setSeen(){
+        queried = true;
         stale = 0;
         lastSeen = System.currentTimeMillis();
     }
@@ -148,7 +150,7 @@ public class Node {
     }
 
     public boolean hasQueried(long now){
-        return (now-lastSeen < QUERY_TIME);
+        return (queried) ? (now-lastSeen < QUERY_TIME) : false;
     }
 
     public boolean verify(Object o){

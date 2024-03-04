@@ -26,7 +26,7 @@ public class PingOperation implements Operation {
     public void run(){
         long now = System.currentTimeMillis();
         for(Node n : nodes){
-            if(!n.hasSecureID() || !n.hasQueried(now)){
+            if(!n.hasSecureID() || n.hasQueried(now)){
                 System.out.println("SKIPPING "+now+"  "+n.getLastSeen()+"  "+n);
                 continue;
             }
