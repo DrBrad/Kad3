@@ -29,13 +29,11 @@ public class FindNodeResponse extends MessageBase {
 
     protected void decode(BencodeObject ben){
         if(ben.containsKey("nodes")){
-            byte[] buf = ben.getBytes("nodes");
-            addNodes(buf, Types.IPv4);
+            addNodes(ben.getBytes("nodes"), Types.IPv4);
         }
 
         if(ben.containsKey("nodes6")){
-            byte[] buf = ben.getBytes("nodes6");
-            addNodes(buf, Types.IPv6);
+            addNodes(ben.getBytes("nodes6"), Types.IPv6);
         }
     }
 

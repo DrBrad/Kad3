@@ -38,6 +38,15 @@ public class ErrorMessage extends MessageBase {
 
     public enum ErrorType {
 
+        /*
+		BEP44:
+		205	message (v field) too big.
+		206	invalid signature
+		207	salt (salt field) too big.
+		301	the CAS hash mismatched, re-read value and try again.
+		302	sequence number less than current.
+		*/
+
         GENERIC {
             @Override
             public int getCode(){

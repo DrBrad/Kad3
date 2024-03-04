@@ -34,24 +34,21 @@ public class JoinOperation implements Operation {
         server.send(new RPCRequestCall(request, new MessageCallback(){
             @Override
             public void onResponse(MessageBase message){
-                switch(message.getType()){
-                    case RSP_MSG:
-                        FindNodeResponse r = (FindNodeResponse) message;
+                FindNodeResponse r = (FindNodeResponse) message;
 
-                        server.getRoutingTable().insert(new Node(r.getUID(), message.getOrigin()));
-                        System.out.println("SEEN FN "+message.getOrigin());
+                server.getRoutingTable().insert(new Node(r.getUID(), message.getOrigin()));
+                System.out.println("SEEN FN "+message.getOrigin());
 
-                        new PingOperation(server, r.getAllNodes()).run();
+                new PingOperation(server, r.getAllNodes()).run();
 
-                        if(!refresh.isRunning()){
-                            refresh.start();
-                        }
-                        break;
-
-                    case ERR_MSG:
-                        System.err.println("Unable to join node, node sent error message: "+((ErrorMessage) message).getErrorType().getCode()+" - "+((ErrorMessage) message).getErrorType().getDescription());
-                        break;
+                if(!refresh.isRunning()){
+                    refresh.start();
                 }
+            }
+
+            @Override
+            public void onError(ErrorMessage message){
+                System.err.println("Unable to join node, node sent error message: "+message.getErrorType().getCode()+" - "+message.getErrorType().getDescription());
             }
 
             @Override

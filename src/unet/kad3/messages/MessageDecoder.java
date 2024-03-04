@@ -6,8 +6,12 @@ import unet.kad3.messages.FindNodeResponse;
 import unet.kad3.messages.PingRequest;
 import unet.kad3.messages.PingResponse;
 import unet.kad3.messages.inter.MessageBase;
+import unet.kad3.messages.inter.MessageException;
 import unet.kad3.utils.UID;
 import unet.kad3.utils.net.AddressUtils;
+
+import static unet.kad3.messages.inter.MessageBase.Method.FIND_NODE;
+import static unet.kad3.messages.inter.MessageBase.Method.UNKNOWN;
 
 public class MessageDecoder {
 
@@ -41,11 +45,12 @@ public class MessageDecoder {
     private MessageBase.Type type;
     private BencodeObject ben;
 
-    public MessageDecoder(byte[] b){
+    public MessageDecoder(byte[] b)throws MessageException {
         ben = new BencodeObject(b);
         if(!ben.containsKey("t") || !ben.containsKey(MessageBase.Type.TYPE_KEY)){
-            type = MessageBase.Type.INVALID;
+            throw new MessageException("");
         }
+
         tid = ben.getBytes("t");
         type = MessageBase.Type.fromRPCTypeName(ben.getString(MessageBase.Type.TYPE_KEY));
     }
@@ -58,13 +63,16 @@ public class MessageDecoder {
         return type;
     }
 
-    public MessageBase decodeRequest(){
+    public MessageBase decodeRequest()throws MessageException {
+        if(!ben.containsKey(type.innerKey())){
+            throw new MessageException("Request doesn't contain body", ErrorMessage.ErrorType.PROTOCOL);
+        }
+
+        if(!ben.getBencodeObject(type.innerKey()).containsKey("id")){
+            throw new MessageException("Request doesn't contain UID", ErrorMessage.ErrorType.PROTOCOL);
+        }
+
         MessageBase message;
-
-        //if(!ben.containsKey(type.getRPCTypeName()) && !ben.containsKey("id")){
-        //    return new MessageBase(tid, MessageBase.Method.UNKNOWN, MessageBase.Type.INVALID);
-        //}
-
         MessageBase.Method m = MessageBase.Method.fromRPCName(ben.getString(type.getRPCTypeName()));
 
         switch(m){
@@ -78,7 +86,7 @@ public class MessageDecoder {
                 break;
 
             default:
-                return new MessageBase(tid, MessageBase.Method.UNKNOWN, MessageBase.Type.INVALID); //UNKNOWN
+                throw new MessageException("Request is using "+m+" method", ErrorMessage.ErrorType.METHOD);
         }
 
         message.setUID(new UID(ben.getBencodeObject(type.innerKey()).getBytes("id")));
@@ -87,12 +95,16 @@ public class MessageDecoder {
         return message;
     }
 
-    public MessageBase decodeResponse(MessageBase.Method method){
-        MessageBase message;
+    public MessageBase decodeResponse(MessageBase.Method method)throws MessageException {
+        if(!ben.containsKey(type.innerKey())){
+            throw new MessageException("Request doesn't contain body", ErrorMessage.ErrorType.PROTOCOL);
+        }
 
-        //if(!ben.containsKey("id")){
-        //    return new MessageBase(tid, method, MessageBase.Type.INVALID);
-        //}
+        if(!ben.getBencodeObject(type.innerKey()).containsKey("id")){
+            throw new MessageException("Request doesn't contain UID", ErrorMessage.ErrorType.PROTOCOL);
+        }
+
+        MessageBase message;
 
         //try{
         switch(method){
@@ -101,6 +113,11 @@ public class MessageDecoder {
                 break;
 
             case FIND_NODE:
+                if(!ben.getBencodeObject(type.innerKey()).containsKey("nodes") &&
+                        !ben.getBencodeObject(type.innerKey()).containsKey("nodes6")){
+                    throw new MessageException("Response to "+FIND_NODE+" did not contain 'node' or 'node6'", ErrorMessage.ErrorType.PROTOCOL);
+                }
+
                 message = new FindNodeResponse(tid);
                 ((FindNodeResponse) message).decode(ben.getBencodeObject(type.innerKey()));
                 break;
@@ -114,6 +131,7 @@ public class MessageDecoder {
         }
 
         message.setUID(new UID(ben.getBencodeObject(type.innerKey()).getBytes("id")));
+
         if(ben.containsKey("ip")){
             message.setPublic(AddressUtils.unpackAddress(ben.getBytes("ip")));
         }
@@ -125,7 +143,11 @@ public class MessageDecoder {
         return message;
     }
 
-    public MessageBase decodeError(){
+    public ErrorMessage decodeError()throws MessageException {
+        if(!ben.containsKey(type.innerKey())){
+            throw new MessageException("Request doesn't contain body", ErrorMessage.ErrorType.PROTOCOL);
+        }
+
         ErrorMessage message = new ErrorMessage(tid);
         message.decode(ben.getBencodeArray(type.innerKey()));
 

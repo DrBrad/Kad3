@@ -46,38 +46,36 @@ public class BucketRefresh implements Operation {
                             public void onResponse(MessageBase message){
                                 n.setSeen();
 
-                                switch(message.getType()){
-                                    case RSP_MSG:
-                                        System.out.println("SEEN FN "+message.getOrigin());
-                                        FindNodeResponse r = (FindNodeResponse) message;
+                                System.out.println("SEEN FN "+message.getOrigin());
+                                FindNodeResponse r = (FindNodeResponse) message;
 
-                                        //queries.addAll(r.getAllNodes());
+                                //queries.addAll(r.getAllNodes());
 
-                                        List<Node> nodes = r.getAllNodes();
-                                        for(int i = nodes.size()-1; i > -1; i--){
-                                            if(queries.contains(nodes.get(i))){
-                                                nodes.remove(nodes.get(i));
-                                            }
-                                        }
-
-                                        /*
-                                        //queries.addAll(nodes);
-                                        for(Node n : r.getAllNodes()){
-                                            server.getRoutingTable().insert(n);
-                                            n.markStale();
-                                        }
-
-                                        new PingOperation(server, r.getAllNodes()).run();
-                                        */
-                                        queries.addAll(nodes);
-
-                                        new PingOperation(server, nodes).run();
-                                        break;
-
-                                    case ERR_MSG:
-                                        System.err.println("Node sent error message: "+((ErrorMessage) message).getErrorType().getCode()+" - "+((ErrorMessage) message).getErrorType().getDescription());
-                                        break;
+                                List<Node> nodes = r.getAllNodes();
+                                for(int i = nodes.size()-1; i > -1; i--){
+                                    if(queries.contains(nodes.get(i))){
+                                        nodes.remove(nodes.get(i));
+                                    }
                                 }
+
+                                /*
+                                //queries.addAll(nodes);
+                                for(Node n : r.getAllNodes()){
+                                    server.getRoutingTable().insert(n);
+                                    n.markStale();
+                                }
+
+                                new PingOperation(server, r.getAllNodes()).run();
+                                */
+                                queries.addAll(nodes);
+
+                                new PingOperation(server, nodes).run();
+                            }
+
+                            @Override
+                            public void onError(ErrorMessage message){
+                                n.setSeen();
+                                System.err.println("Node sent error message: "+message.getErrorType().getCode()+" - "+message.getErrorType().getDescription());
                             }
 
                             @Override

@@ -3,6 +3,7 @@ package unet.kad3;
 import unet.kad3.messages.*;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.MessageDecoder;
+import unet.kad3.messages.inter.MessageException;
 import unet.kad3.utils.Node;
 import unet.kad3.utils.UID;
 
@@ -17,13 +18,13 @@ import static unet.kad3.rpc.RPCServer.TID_LENGTH;
 
 public class MessageTest {
 
-    public static void main(String[] args)throws UnknownHostException {
+    public static void main(String[] args)throws UnknownHostException, MessageException {
         UID uid = new UID("992c105ffed716245654fd4c2c4d71e0f2df58cc");
         pingRequest(uid);
         findNodeRequest(uid);
     }
 
-    public static void pingRequest(UID uid)throws UnknownHostException {
+    public static void pingRequest(UID uid)throws UnknownHostException, MessageException {
         PingRequest r = new PingRequest(new byte[TID_LENGTH]);
         r.setUID(uid);
         System.out.println("PING REQUEST:");
@@ -33,7 +34,7 @@ public class MessageTest {
         pingResponse(r, uid);
     }
 
-    public static void findNodeRequest(UID uid)throws UnknownHostException {
+    public static void findNodeRequest(UID uid)throws UnknownHostException, MessageException {
         FindNodeRequest r = new FindNodeRequest(new byte[TID_LENGTH]);
         r.setUID(uid);
         r.setTarget(new UID("5a3ce9c14e7a08645677bbd1cfe7d8f956d53256"));
@@ -44,7 +45,7 @@ public class MessageTest {
         findNodeResponse(r, uid);
     }
 
-    public static void pingResponse(PingRequest m, UID uid)throws UnknownHostException {
+    public static void pingResponse(PingRequest m, UID uid)throws UnknownHostException, MessageException {
         PingResponse r = new PingResponse(m.getTransactionID());
         r.setUID(uid);
         r.setPublic(Inet4Address.getLocalHost(), 8080);
@@ -53,7 +54,7 @@ public class MessageTest {
         checkResponse(m.getMethod(), r);
     }
 
-    public static void findNodeResponse(FindNodeRequest m, UID uid)throws UnknownHostException {
+    public static void findNodeResponse(FindNodeRequest m, UID uid)throws UnknownHostException, MessageException {
         FindNodeResponse r = new FindNodeResponse(m.getTransactionID());
         r.setUID(uid);
         r.setPublic(Inet4Address.getLocalHost(), 8080);
@@ -77,7 +78,7 @@ public class MessageTest {
         checkResponse(m.getMethod(), r);
     }
 
-    public static void checkRequest(MessageBase m){
+    public static void checkRequest(MessageBase m)throws MessageException {
         byte[] b = m.encode();
         m = new MessageDecoder(b).decodeRequest();
         System.out.println("Encoding > Decode Match: "+matches(b, m.encode()));
@@ -85,7 +86,7 @@ public class MessageTest {
         System.out.println();
     }
 
-    public static void checkResponse(MessageBase.Method t, MessageBase m){
+    public static void checkResponse(MessageBase.Method t, MessageBase m)throws MessageException {
         byte[] b = m.encode();
         m = new MessageDecoder(b).decodeResponse(t);
         System.out.println("Encoding > Decode Match: "+matches(b, m.encode()));

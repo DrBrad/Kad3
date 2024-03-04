@@ -1,8 +1,8 @@
 package unet.kad3.rpc;
 
 import unet.kad3.messages.ErrorMessage;
+import unet.kad3.messages.inter.MessageException;
 import unet.kad3.operations.refresh.BucketRefresh;
-import unet.kad3.operations.refresh.StaleRefresh;
 import unet.kad3.rpc.calls.RPCRequestCall;
 import unet.kad3.rpc.calls.inter.RPCCall;
 import unet.kad3.messages.inter.MessageBase;
@@ -10,7 +10,6 @@ import unet.kad3.messages.MessageDecoder;
 import unet.kad3.routing.inter.RoutingTable;
 import unet.kad3.utils.ByteWrapper;
 import unet.kad3.utils.Node;
-import unet.kad3.utils.UID;
 import unet.kad3.utils.net.AddressUtils;
 
 import java.io.IOException;
@@ -150,24 +149,30 @@ public class RPCServer {
         //SPAM THROTTLE...
 
         //CATCH IF NO TID... - MESSAGE IS POINTLESS - IGNORE
-        MessageDecoder d = new MessageDecoder(packet.getData());
+        try{
+            MessageDecoder d = new MessageDecoder(packet.getData());
 
-        switch(d.getType()){
-            case REQ_MSG: {
-                    MessageBase m = d.decodeRequest();
+            switch(d.getType()){
+                case REQ_MSG: {
+                    try{
+                        MessageBase m = d.decodeRequest();
+                        m.setOrigin(packet.getAddress(), packet.getPort());
 
-                    m.setOrigin(packet.getAddress(), packet.getPort());
-
-                    if(m.getUID() != null){
                         routingTable.insert(new Node(m.getUID(), m.getOrigin()));
                         System.out.println("SEEN RQ: "+new Node(m.getUID(), m.getOrigin()));
-                    }
 
-                    receiver.onRequest(m);
+                        receiver.onRequest(m);
+
+                    }catch(MessageException e){
+                        ErrorMessage m = new ErrorMessage(d.getTransactionID());
+                        m.setErrorType(e.getErrorType());
+                        send(new RPCCall(m));
+                        e.printStackTrace();
+                    }
                 }
                 break;
 
-            case RSP_MSG: {
+                case RSP_MSG: {
                     ByteWrapper tid = new ByteWrapper(d.getTransactionID());
 
                     if(!calls.containsKey(tid)){
@@ -176,6 +181,7 @@ public class RPCServer {
 
                     RPCRequestCall call = calls.get(tid);
                     calls.remove(tid);
+
                     MessageBase m = d.decodeResponse(call.getMessage().getMethod());
                     m.setOrigin(packet.getAddress(), packet.getPort());
 
@@ -193,7 +199,7 @@ public class RPCServer {
                 }
                 break;
 
-            case ERR_MSG: {
+                case ERR_MSG: {
                     ByteWrapper tid = new ByteWrapper(d.getTransactionID());
 
                     if(!calls.containsKey(tid)){
@@ -202,7 +208,8 @@ public class RPCServer {
 
                     RPCRequestCall call = calls.get(tid);
                     calls.remove(tid);
-                    MessageBase m = d.decodeError();
+
+                    ErrorMessage m = d.decodeError();
                     m.setOrigin(packet.getAddress(), packet.getPort());
 
                     //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
@@ -215,9 +222,12 @@ public class RPCServer {
                         routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
                     }
 
-                    call.getMessageCallback().onResponse(m);
+                    call.getMessageCallback().onError(m);
                 }
                 break;
+            }
+        }catch(MessageException e){
+            e.printStackTrace();
         }
     }
 
