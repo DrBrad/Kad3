@@ -169,23 +169,28 @@ public class RPCServer {
                 break;
 
                 case RSP_MSG: {
-                    ByteWrapper tid = new ByteWrapper(d.getTransactionID());
+                        ByteWrapper tid = new ByteWrapper(d.getTransactionID());
 
-                    if(!calls.containsKey(tid)){
-                        return;
-                    }
+                        if(!calls.containsKey(tid)){
+                            return;
+                        }
 
-                    RPCRequestCall call = calls.get(tid);
-                    calls.remove(tid);
+                        RPCRequestCall call = calls.get(tid);
+                        calls.remove(tid);
 
-                    //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
-                    if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
-                            packet.getPort() != call.getMessage().getDestinationPort()){
-                        return;
-                    }
+                        //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
+                        if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
+                                packet.getPort() != call.getMessage().getDestinationPort()){
+                            return;
+                        }
 
                     //try{
                         MessageBase m = d.decodeResponse(call.getMessage().getMethod());
+
+                        if(!m.getUID().equals(call.getMessage().getUID())){
+                            return;
+                        }
+
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
                         if(m.getPublic() != null){
@@ -201,23 +206,28 @@ public class RPCServer {
                 break;
 
                 case ERR_MSG: {
-                    ByteWrapper tid = new ByteWrapper(d.getTransactionID());
+                        ByteWrapper tid = new ByteWrapper(d.getTransactionID());
 
-                    if(!calls.containsKey(tid)){
-                        return;
-                    }
+                        if(!calls.containsKey(tid)){
+                            return;
+                        }
 
-                    RPCRequestCall call = calls.get(tid);
-                    calls.remove(tid);
+                        RPCRequestCall call = calls.get(tid);
+                        calls.remove(tid);
 
-                    //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
-                    if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
-                            packet.getPort() != call.getMessage().getDestinationPort()){
-                        return;
-                    }
+                        //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
+                        if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
+                                packet.getPort() != call.getMessage().getDestinationPort()){
+                            return;
+                        }
 
                     //try{
                         ErrorMessage m = d.decodeError();
+
+                        if(!m.getUID().equals(call.getMessage().getUID())){
+                            return;
+                        }
+
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
                         if(m.getPublic() != null){
