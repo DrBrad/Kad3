@@ -22,6 +22,7 @@ public class MessageTest {
         UID uid = new UID("992c105ffed716245654fd4c2c4d71e0f2df58cc");
         pingRequest(uid);
         findNodeRequest(uid);
+        checkError();
     }
 
     public static void pingRequest(UID uid)throws UnknownHostException, MessageException {
@@ -78,6 +79,14 @@ public class MessageTest {
         checkResponse(m.getMethod(), r);
     }
 
+    public static void checkError()throws MessageException {
+        ErrorMessage r = new ErrorMessage(new byte[TID_LENGTH]);
+        r.setErrorType(ErrorMessage.ErrorType.PROTOCOL);
+        System.out.println("FIND_NODE REQUEST:");
+        System.out.println(r);
+        checkError(r);
+    }
+
     public static void checkRequest(MessageBase m)throws MessageException {
         byte[] b = m.encode();
         m = new MessageDecoder(b).decodeRequest();
@@ -89,6 +98,14 @@ public class MessageTest {
     public static void checkResponse(MessageBase.Method t, MessageBase m)throws MessageException {
         byte[] b = m.encode();
         m = new MessageDecoder(b).decodeResponse(t);
+        System.out.println("Encoding > Decode Match: "+matches(b, m.encode()));
+        System.out.println();
+        System.out.println();
+    }
+
+    public static void checkError(MessageBase m)throws MessageException {
+        byte[] b = m.encode();
+        m = new MessageDecoder(b).decodeError();
         System.out.println("Encoding > Decode Match: "+matches(b, m.encode()));
         System.out.println();
         System.out.println();

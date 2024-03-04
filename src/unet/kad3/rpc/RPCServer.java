@@ -38,6 +38,7 @@ public class RPCServer {
     };*/
 
     //private final List<RequestListener> requestListeners;
+    private SecureRandom r;
     protected final RoutingTable routingTable;
     protected final RPCReceiver receiver;
 
@@ -46,9 +47,13 @@ public class RPCServer {
         receiver = new RPCReceiver(this);
         //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
-        //sendPool = new ConcurrentLinkedQueue<>();
         calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
-        //requestListeners = new ArrayList<>();
+
+        try{
+            r = SecureRandom.getInstance("SHA1PRNG");
+        }catch(NoSuchAlgorithmException e){
+            e.printStackTrace();
+        }
 
         //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
 
@@ -184,20 +189,25 @@ public class RPCServer {
                     RPCRequestCall call = calls.get(tid);
                     calls.remove(tid);
 
-                    MessageBase m = d.decodeResponse(call.getMessage().getMethod());
-                    m.setOrigin(packet.getAddress(), packet.getPort());
-
                     //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
                     if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
                             packet.getPort() != call.getMessage().getDestinationPort()){
                         return;
                     }
 
-                    if(m.getPublic() != null){
-                        routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
-                    }
+                    //try{
+                        MessageBase m = d.decodeResponse(call.getMessage().getMethod());
+                        m.setOrigin(packet.getAddress(), packet.getPort());
 
-                    call.getMessageCallback().onResponse(m);
+                        if(m.getPublic() != null){
+                            routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
+                        }
+
+                        call.getMessageCallback().onResponse(m);
+
+                    //}catch(MessageException e){
+                    //    call.getMessageCallback().onException(e);
+                    //}
                 }
                 break;
 
@@ -211,20 +221,25 @@ public class RPCServer {
                     RPCRequestCall call = calls.get(tid);
                     calls.remove(tid);
 
-                    ErrorMessage m = d.decodeError();
-                    m.setOrigin(packet.getAddress(), packet.getPort());
-
                     //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
                     if(!packet.getAddress().equals(call.getMessage().getDestinationAddress()) ||
                             packet.getPort() != call.getMessage().getDestinationPort()){
                         return;
                     }
 
-                    if(m.getPublic() != null){
-                        routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
-                    }
+                    //try{
+                        ErrorMessage m = d.decodeError();
+                        m.setOrigin(packet.getAddress(), packet.getPort());
 
-                    call.getMessageCallback().onError(m);
+                        if(m.getPublic() != null){
+                            routingTable.updatePublicIPConsensus(m.getOriginAddress(), m.getPublicAddress());
+                        }
+
+                        call.getMessageCallback().onErrorResponse(m);
+
+                    //}catch(MessageException e){
+                    //    call.getMessageCallback().onException(e);
+                    //}
                 }
                 break;
             }
@@ -255,7 +270,7 @@ public class RPCServer {
 
             server.send(packet);
 
-        }catch(IOException | NoSuchAlgorithmException e){
+        }catch(IOException e){
             e.printStackTrace();
         }
     }
@@ -276,17 +291,9 @@ public class RPCServer {
     }
 
     //DONT INIT EVERY TIME...
-    private byte[] generateTransactionID()throws NoSuchAlgorithmException {
+    private byte[] generateTransactionID(){
         byte[] tid = new byte[TID_LENGTH];
-        SecureRandom r = SecureRandom.getInstance("SHA1PRNG");
         r.nextBytes(tid);
         return tid;
     }
-
-    /*
-    public interface RequestListener {
-
-        void onRequest(MessageBase message);
-    }
-    */
 }

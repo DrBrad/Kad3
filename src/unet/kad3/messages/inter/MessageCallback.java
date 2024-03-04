@@ -6,8 +6,11 @@ public abstract class MessageCallback {
 
     public abstract void onResponse(MessageBase message);
 
-    public void onError(ErrorMessage message){
+    public void onErrorResponse(ErrorMessage message){
     }
+
+    //public void onException(MessageException exception){
+    //}
 
     public void onStalled(){
     }

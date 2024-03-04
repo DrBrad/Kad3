@@ -1,6 +1,7 @@
 package unet.kad3.operations;
 
 import unet.kad3.messages.ErrorMessage;
+import unet.kad3.messages.inter.MessageException;
 import unet.kad3.rpc.RPCServer;
 import unet.kad3.rpc.calls.RPCRequestCall;
 import unet.kad3.operations.inter.Operation;
@@ -45,9 +46,17 @@ public class PingOperation implements Operation {
                 }
 
                 @Override
-                public void onError(ErrorMessage message){
+                public void onErrorResponse(ErrorMessage message){
                     server.getRoutingTable().insert(n);
                 }
+
+                /*
+                @Override
+                public void onException(MessageException exception){
+                    server.getRoutingTable().insert(n);
+                    exception.printStackTrace();
+                }
+                */
 
                 @Override
                 public void onStalled(){

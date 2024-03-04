@@ -1,6 +1,7 @@
 package unet.kad3.operations.refresh;
 
 import unet.kad3.messages.ErrorMessage;
+import unet.kad3.messages.inter.MessageException;
 import unet.kad3.rpc.RPCServer;
 import unet.kad3.rpc.calls.RPCRequestCall;
 import unet.kad3.operations.inter.Operation;
@@ -73,10 +74,18 @@ public class BucketRefresh implements Operation {
                             }
 
                             @Override
-                            public void onError(ErrorMessage message){
+                            public void onErrorResponse(ErrorMessage message){
                                 n.setSeen();
                                 System.err.println("Node sent error message: "+message.getErrorType().getCode()+" - "+message.getErrorType().getDescription());
                             }
+
+                            /*
+                            @Override
+                            public void onException(MessageException exception){
+                                n.setSeen();
+                                exception.printStackTrace();
+                            }
+                            */
 
                             @Override
                             public void onStalled(){

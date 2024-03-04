@@ -1,5 +1,7 @@
 package unet.kad3;
 
+import unet.kad3.operations.inter.Operation;
+
 import java.net.InetAddress;
 
 public class Main {
@@ -46,6 +48,7 @@ public class Main {
     UPnP
 
     Dont auto set LAST SEEN TO - TIME STAMP USE BETTER METHOD...
+    Make the decode better
     */
 
     public static void main(String[] args){

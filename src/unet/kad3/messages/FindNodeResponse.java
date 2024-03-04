@@ -28,6 +28,10 @@ public class FindNodeResponse extends MessageBase {
     }
 
     protected void decode(BencodeObject ben){
+        //if(!ben.containsKey("nodes") && !ben.containsKey("nodes6")){
+
+        //}
+
         if(ben.containsKey("nodes")){
             addNodes(ben.getBytes("nodes"), Types.IPv4);
         }
