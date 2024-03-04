@@ -18,6 +18,9 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
@@ -29,6 +32,7 @@ public class RPCServer {
     private final ConcurrentLinkedQueue<DatagramPacket> receivePool;
 
     private final ConcurrentHashMap<ByteWrapper, RPCRequestCall> calls;
+    private final ConcurrentLinkedQueue<ByteWrapper> callsOrder;
     private SecureRandom r;
     protected final RoutingTable routingTable;
     protected final RPCReceiver receiver;
@@ -39,6 +43,7 @@ public class RPCServer {
         //this.dht = dht;
         receivePool = new ConcurrentLinkedQueue<>();
         calls = new ConcurrentHashMap<>(MAX_ACTIVE_CALLS);
+        callsOrder = new ConcurrentLinkedQueue<>();
 
         try{
             r = SecureRandom.getInstance("SHA1PRNG");
@@ -171,11 +176,12 @@ public class RPCServer {
                 case RSP_MSG: {
                         ByteWrapper tid = new ByteWrapper(d.getTransactionID());
 
-                        if(!calls.containsKey(tid)){
+                        if(!callsOrder.contains(tid)){
                             return;
                         }
 
                         RPCRequestCall call = calls.get(tid);
+                        callsOrder.remove(tid);
                         calls.remove(tid);
 
                         //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
@@ -203,11 +209,12 @@ public class RPCServer {
                 case ERR_MSG: {
                         ByteWrapper tid = new ByteWrapper(d.getTransactionID());
 
-                        if(!calls.containsKey(tid)){
+                        if(!callsOrder.contains(tid)){
                             return;
                         }
 
                         RPCRequestCall call = calls.get(tid);
+                        callsOrder.remove(tid);
                         calls.remove(tid);
 
                         //ENSURE RESPONSE IS ADDRESS IS ACCURATE...
@@ -252,7 +259,9 @@ public class RPCServer {
                     byte[] tid = generateTransactionID(); //TRY UP TO 5 TIMES TO GENERATE RANDOM - NOT WITHIN CALLS...
                     call.getMessage().setTransactionID(tid);
                     ((RPCRequestCall) call).sent();
-                    calls.put(new ByteWrapper(tid), (RPCRequestCall) call);
+                    ByteWrapper wrapper = new ByteWrapper(tid);
+                    callsOrder.add(wrapper);
+                    calls.put(wrapper, (RPCRequestCall) call);
                     break;
             }
 
@@ -268,12 +277,16 @@ public class RPCServer {
 
     private void removeStalled(){
         long now = System.currentTimeMillis();
-        for(ByteWrapper tid : calls.keySet()){
+        //for(int i = calls.size()-1; i > -1; i--){
+        //for(ByteWrapper tid : calls.keySet()){
+        //for(int i = 0; i < calls.size(); i++){
+        for(ByteWrapper tid : callsOrder){
             RPCRequestCall call = calls.get(tid);
             if(!call.isStalled(now)){
-                continue;
+                break;
             }
 
+            callsOrder.remove(tid);
             calls.remove(tid);
             call.getMessageCallback().onStalled();
 
