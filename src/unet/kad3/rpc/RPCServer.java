@@ -166,8 +166,10 @@ public class RPCServer {
                     }catch(MessageException e){
                         ErrorMessage m = new ErrorMessage(d.getTransactionID());
                         m.setErrorType(e.getErrorType());
+                        m.setDestination(packet.getAddress(), packet.getPort());
+                        m.setPublic(packet.getAddress(), packet.getPort());
                         send(new RPCCall(m));
-                        e.printStackTrace();
+                        //e.printStackTrace();
                     }
                 }
                 break;
