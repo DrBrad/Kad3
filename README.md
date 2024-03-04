@@ -16,9 +16,16 @@ Features
 -----
 - [x] PING
 - [x] FIND_NODE
+- [x] GET
+- [x] PUT
 - [x] Same protocol as BitTorrent (Easy Torrent Implementation)
 - [x] No external Libraries
 - [x] Option for MainLine or Kademlia
+- [x] Teredo support
+- [x] Consensus IP defining
+- [x] Bogon detecting
+- [x] Spam Throttling
+- [x] Secure ID only option
 
 | BEP | Title | Status |
 |------|-------|--------|
