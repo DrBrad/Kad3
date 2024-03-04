@@ -49,6 +49,8 @@ public class Main {
 
     Dont auto set LAST SEEN TO - TIME STAMP USE BETTER METHOD...
     Make the decode better
+
+    Can we handle the stalling better...?
     */
 
     public static void main(String[] args){
