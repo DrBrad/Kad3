@@ -10,7 +10,7 @@ A DHT (Distributed Hash Table) is a distributed network that uses an XOR based r
 > Decentralized networks work on a teir based system meaning that some nodes have more power or say than others do.
 
 > [!IMPORTANT]
-> THIS IS NOT FINISHED YET!
+> This is a DHT implementation, NOT a torrent implementation, this can talk with BitTorrent but it can only do FIND_NODE, PING, GET, & PUT.
 
 Features
 -----
@@ -25,6 +25,25 @@ Features
 |[BEP5](http://bittorrent.org/beps/bep_0005.html)|Bittorrent DHT| Yes |
 |[BEP32](http://bittorrent.org/beps/bep_0032.html)|IPv6| Yes |
 |[BEP42](http://www.bittorrent.org/beps/bep_0042.html)|DHT Security Extension| Yes |
+
+Examples
+-----
+To join a node you can do
+```java
+Kademlia k = new Kademlia();
+k.join(6881, InetAddress.getByName("HOSENAME"), 6881);
+```
+
+To start a node without joining you can do
+```java
+Kademlia k = new Kademlia();
+k.bind(6881);
+```
+
+To set Kademlia to Mainline you can do:
+```java
+Kademlia k = new Kademlia("MainLine");
+```
 
 Requirements
 -----
