@@ -45,6 +45,10 @@ public class BucketRefresh implements Operation {
                         server.send(new RPCRequestCall(request, new MessageCallback(){
                             @Override
                             public void onResponse(MessageBase message){
+                                if(!n.getUID().equals(message.getUID())){
+                                    return;
+                                }
+
                                 n.setSeen();
 
                                 System.out.println("SEEN FN "+message.getOrigin());
@@ -75,6 +79,10 @@ public class BucketRefresh implements Operation {
 
                             @Override
                             public void onErrorResponse(ErrorMessage message){
+                                if(!n.getUID().equals(message.getUID())){
+                                    return;
+                                }
+
                                 n.setSeen();
                                 System.err.println("Node sent error message: "+message.getErrorType().getCode()+" - "+message.getErrorType().getDescription());
                             }

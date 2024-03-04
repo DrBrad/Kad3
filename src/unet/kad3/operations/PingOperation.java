@@ -41,13 +41,22 @@ public class PingOperation implements Operation {
             server.send(new RPCRequestCall(request, new MessageCallback(){
                 @Override
                 public void onResponse(MessageBase message){
+                    if(!n.getUID().equals(message.getUID())){
+                        return;
+                    }
+
                     server.getRoutingTable().insert(n);
                     System.out.println("SEEN "+n.getAddress().getHostName());
                 }
 
                 @Override
                 public void onErrorResponse(ErrorMessage message){
+                    if(!n.getUID().equals(message.getUID())){
+                        return;
+                    }
+
                     server.getRoutingTable().insert(n);
+                    System.out.println("SEEN ER "+n.getAddress().getHostName());
                 }
 
                 /*

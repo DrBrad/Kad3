@@ -186,11 +186,6 @@ public class RPCServer {
 
                     //try{
                         MessageBase m = d.decodeResponse(call.getMessage().getMethod());
-
-                        if(!m.getUID().equals(call.getMessage().getUID())){
-                            return;
-                        }
-
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
                         if(m.getPublic() != null){
@@ -223,11 +218,6 @@ public class RPCServer {
 
                     //try{
                         ErrorMessage m = d.decodeError();
-
-                        if(!m.getUID().equals(call.getMessage().getUID())){
-                            return;
-                        }
-
                         m.setOrigin(packet.getAddress(), packet.getPort());
 
                         if(m.getPublic() != null){
