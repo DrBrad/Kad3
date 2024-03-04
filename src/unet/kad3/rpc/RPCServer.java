@@ -27,17 +27,8 @@ public class RPCServer {
 
     private DatagramSocket server;
     private final ConcurrentLinkedQueue<DatagramPacket> receivePool;
-    //private final ConcurrentLinkedQueue<MessageBase> sendPool;
 
     private final ConcurrentHashMap<ByteWrapper, RPCRequestCall> calls;
-    /*private final LinkedHashMap<ByteWrapper, RPCRequestCall> calls  = new LinkedHashMap<>(512, 0.75f, true){
-        @Override
-        protected boolean removeEldestEntry(Map.Entry<ByteWrapper, RPCRequestCall> eldest){
-            return (size() > 512);
-        }
-    };*/
-
-    //private final List<RequestListener> requestListeners;
     private SecureRandom r;
     protected final RoutingTable routingTable;
     protected final RPCReceiver receiver;
@@ -54,8 +45,6 @@ public class RPCServer {
         }catch(NoSuchAlgorithmException e){
             e.printStackTrace();
         }
-
-        //routingTable.deriveUID(); //NOT SURE IF THIS WILL FAIL WHEN ITS EMPTY
 
         routingTable.addRestartListener(new RoutingTable.RestartListener(){
             @Override
@@ -244,6 +233,8 @@ public class RPCServer {
                 break;
             }
         }catch(MessageException e){
+            //WE CANT TRUST THE MESSAGE - WE SHOULDN'T ACCEPT IF NO TID OR MESSAGE TYPE IS DEFINED
+            //RESPONSE MALFORMED SHOULD BE IGNORED... - MAYBE WE SAVE TO ROUTING TABLE...?
             e.printStackTrace();
         }
     }

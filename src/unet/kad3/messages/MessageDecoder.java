@@ -1,17 +1,14 @@
 package unet.kad3.messages;
 
 import unet.kad3.libs.bencode.variables.BencodeObject;
-import unet.kad3.messages.FindNodeRequest;
-import unet.kad3.messages.FindNodeResponse;
-import unet.kad3.messages.PingRequest;
-import unet.kad3.messages.PingResponse;
 import unet.kad3.messages.inter.MessageBase;
 import unet.kad3.messages.inter.MessageException;
 import unet.kad3.utils.UID;
+import unet.kad3.utils.net.AddressType;
 import unet.kad3.utils.net.AddressUtils;
 
 import static unet.kad3.messages.inter.MessageBase.Method.FIND_NODE;
-import static unet.kad3.messages.inter.MessageBase.Method.UNKNOWN;
+import static unet.kad3.utils.NodeUtils.*;
 
 public class MessageDecoder {
 
@@ -48,7 +45,7 @@ public class MessageDecoder {
     public MessageDecoder(byte[] b)throws MessageException {
         ben = new BencodeObject(b);
         if(!ben.containsKey("t") || !ben.containsKey(MessageBase.Type.TYPE_KEY)){
-            throw new MessageException("");
+            throw new MessageException("Required keys are missing", ErrorMessage.ErrorType.PROTOCOL);
         }
 
         tid = ben.getBytes("t");
@@ -81,8 +78,12 @@ public class MessageDecoder {
                 break;
 
             case FIND_NODE:
+                if(!ben.getBencodeObject(type.innerKey()).containsKey("target")){
+                    throw new MessageException("Request of "+FIND_NODE+" did not contain 'target'", ErrorMessage.ErrorType.PROTOCOL);
+                }
+
                 message = new FindNodeRequest(tid);
-                ((FindNodeRequest) message).decode(ben.getBencodeObject(type.innerKey()));
+                ((FindNodeRequest) message).setTarget(new UID(ben.getBencodeObject(type.innerKey()).getBytes("target")));
                 break;
 
             default:
@@ -119,7 +120,15 @@ public class MessageDecoder {
                 }
 
                 message = new FindNodeResponse(tid);
-                ((FindNodeResponse) message).decode(ben.getBencodeObject(type.innerKey()));
+
+                if(ben.getBencodeObject(type.innerKey()).containsKey("nodes")){
+                    ((FindNodeResponse) message).addNodes(unpackNodes(ben.getBencodeObject(type.innerKey()).getBytes("nodes"), AddressType.IPv4), AddressType.IPv4);
+                }
+
+                if(ben.getBencodeObject(type.innerKey()).containsKey("nodes6")){
+                    ((FindNodeResponse) message).addNodes(unpackNodes(ben.getBencodeObject(type.innerKey()).getBytes("nodes6"), AddressType.IPv6), AddressType.IPv6);
+                }
+
                 break;
 
             case GET:
@@ -135,6 +144,7 @@ public class MessageDecoder {
         if(ben.containsKey("ip")){
             message.setPublic(AddressUtils.unpackAddress(ben.getBytes("ip")));
         }
+
         //message.setVersion(ben.getDouble("v"));
         //}catch(){
         //    message = new ErrorMessage(tid);
