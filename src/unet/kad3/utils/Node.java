@@ -19,7 +19,6 @@ public class Node {
 
     private int stale;
     private long lastSeen;
-    private boolean queried = false;
 
     //FOR TESTING PURPOSES ONLY...
 
@@ -132,7 +131,6 @@ public class Node {
 
     //DETAILS
     public void setSeen(){
-        queried = true;
         stale = 0;
         lastSeen = System.currentTimeMillis();
     }
@@ -150,7 +148,7 @@ public class Node {
     }
 
     public boolean hasQueried(long now){
-        return (queried) ? (now-lastSeen < QUERY_TIME) : false;
+        return (lastSeen > 0) ? (now-lastSeen < QUERY_TIME) : false;
     }
 
     public boolean verify(Object o){
